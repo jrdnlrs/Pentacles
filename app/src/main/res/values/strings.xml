@@ -1,3 +1,8 @@
 <resources>
-    <string name="app_name">Forenscan</string>
+        <string name="app_name">Forenscan</string>
+        <string name="scan_networks">Scan Networks</string>
+        <string name="threat_detected">Threat Detected!</string>
+        <string name="all_clear">All Clear</string>
+        <string name="permission_required">Location permission required for WiFi scanning</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

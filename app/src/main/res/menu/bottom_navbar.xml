@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:title="Dashboard"
+        android:icon="@drawable/outline_shield_24"
+        android:id="Dashboard"/>
+    <item android:title="Alerts"
+        android:icon="@drawable/warning"
+        android:id="Alerts"/>
+    <item android:title="Learn"
+        android:icon="@drawable/learn"
+        android:id="Learn"/>
+    <item android:title="Settings"
+        android:icon="@drawable/settings"
+        android:id="Settings"/>
+</menu>
