@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingHorizontal="16dp"
+    android:paddingVertical="12dp">
+
+    <ImageView
+        android:id="@+id/icon_view"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:src="@drawable/ic_warning"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/danger_red" />
+
+    <View
+        android:id="@+id/timeline_line"
+        android:layout_width="1dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:background="@color/gray_200"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/icon_view"
+        app:layout_constraintStart_toStartOf="@id/icon_view"
+        app:layout_constraintTop_toBottomOf="@id/icon_view" />
+
+    <TextView
+        android:id="@+id/title_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:textColor="@color/black"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/time_text"
+        app:layout_constraintStart_toEndOf="@id/icon_view"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Evil Twin Detected" />
+
+    <TextView
+        android:id="@+id/time_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/gray_500"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="2 min ago" />
+
+    <TextView
+        android:id="@+id/description_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:textColor="@color/gray_600"
+        android:textSize="13sp"
+        app:layout_constraintEnd_toStartOf="@+id/alert_status_chip"
+        app:layout_constraintStart_toStartOf="@id/title_text"
+        app:layout_constraintTop_toBottomOf="@id/title_text"
+        tools:text="Suspicious network 'SM_Mall_WiFi' found" />
+
+    <com.google.android.material.chip.Chip
+        android:id="@+id/alert_status_chip"
+        android:layout_width="wrap_content"
+        android:layout_height="24dp"
+        android:minHeight="0dp"
+        android:text="Critical"
+        android:textColor="@color/danger_red"
+        android:textSize="10sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:chipBackgroundColor="@color/critical_red_bg"
+        app:chipCornerRadius="12dp"
+        app:chipStrokeWidth="0dp"
+        app:ensureMinTouchTargetSize="false"
+        app:layout_constraintBottom_toBottomOf="@id/description_text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/description_text"
+        tools:visibility="visible" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
