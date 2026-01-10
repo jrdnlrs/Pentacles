@@ -7,4 +7,24 @@
     <color name="purple_700">#FF3700B3</color>
     <color name="indigo_500">#6366F1</color>
     <color name="indigo_600">#4F46E5</color>
+
+    <color name="background_light">#F0F3F7</color>
+    <color name="gray_200">#E2E8F0</color>
+    <color name="gray_500">#64748B</color>
+    <color name="gray_600">#475569</color>
+    <color name="networks_accent">#4D7CFF</color>
+    <color name="threats_accent">#FF4D7C</color>
+    <color name="connections_accent">#A24DFF</color>
+    <color name="uptime_accent">#4DFF7C</color>
+    <color name="signal_green">#4CAF50</color>
+    <color name="danger_red">#D32F2F</color>
+    <color name="critical_red_bg">#FFCDD2</color>
+
+    <color name="scan_button_gradient_start">#7C4DFF</color>
+    <color name="scan_button_gradient_end">#B388FF</color>
+
+    <color name="chip_text_color">#FFFFFF</color>
+    <color name="chip_background_color">#6A1B9A</color>
+    <color name="switch_track_color">#E2E8F0</color>
+
 </resources>
