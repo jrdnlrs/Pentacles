@@ -7,4 +7,6 @@
     <color name="purple_700">#FF3700B3</color>
     <color name="indigo_500">#6366F1</color>
     <color name="indigo_600">#4F46E5</color>
+    <color name="chip_text_color">#1E293B</color>
+    <color name="chip_background_color">#F1F5F9</color>
 </resources>
