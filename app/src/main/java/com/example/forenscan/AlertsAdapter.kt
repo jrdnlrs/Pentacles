@@ -3,7 +3,9 @@ package com.example.forenscan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 
 // 1. Data Model
@@ -11,7 +13,7 @@ data class AlertItem(
     val title: String,
     val description: String,
     val type: String,     // e.g. "Evil Twin"
-    val severity: String, // e.g. "CRITICAL"
+    val severity: String, // "CRITICAL", "HIGH", "MEDIUM"
     val ssid: String,
     val location: String,
     val timeAgo: String,
@@ -33,6 +35,8 @@ class AlertsAdapter(private val alerts: List<AlertItem>) :
         val time: TextView = view.findViewById(R.id.text_time)
         val mac: TextView = view.findViewById(R.id.text_mac)
         val action: TextView = view.findViewById(R.id.text_action)
+        // Added this to control the icon color
+        val alertIcon: ImageView = view.findViewById(R.id.img_alert_icon)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AlertViewHolder {
@@ -43,6 +47,9 @@ class AlertsAdapter(private val alerts: List<AlertItem>) :
 
     override fun onBindViewHolder(holder: AlertViewHolder, position: Int) {
         val alert = alerts[position]
+        val context = holder.itemView.context
+
+        // Bind Text Data
         holder.title.text = alert.title
         holder.description.text = alert.description
         holder.badgeType.text = alert.type
@@ -53,12 +60,26 @@ class AlertsAdapter(private val alerts: List<AlertItem>) :
         holder.mac.text = alert.macAddress
         holder.action.text = alert.recommendedAction
 
-        // Logic to change colors based on Severity (Optional but recommended)
-        if (alert.severity == "CRITICAL") {
-            holder.badgeSeverity.setTextColor(holder.itemView.context.getColor(android.R.color.holo_red_dark))
-            holder.badgeSeverity.setBackgroundResource(R.drawable.badge_critical_bg)
-        } else {
-            // Add logic for Warning/Medium here
+        // Dynamic Styling based on Severity
+        when (alert.severity) {
+            "CRITICAL" -> {
+                // Red Theme
+                holder.badgeSeverity.setBackgroundResource(R.drawable.badge_critical_bg)
+                holder.badgeSeverity.setTextColor(ContextCompat.getColor(context, R.color.red_700))
+                holder.alertIcon.setColorFilter(ContextCompat.getColor(context, R.color.red_600))
+            }
+            "HIGH" -> {
+                // Orange Theme
+                holder.badgeSeverity.setBackgroundResource(R.drawable.badge_high_bg)
+                holder.badgeSeverity.setTextColor(ContextCompat.getColor(context, R.color.orange_700))
+                holder.alertIcon.setColorFilter(ContextCompat.getColor(context, R.color.orange_600))
+            }
+            "MEDIUM" -> {
+                // Yellow/Neutral Theme
+                holder.badgeSeverity.setBackgroundResource(R.drawable.badge_neutral_bg)
+                holder.badgeSeverity.setTextColor(ContextCompat.getColor(context, R.color.slate_600))
+                holder.alertIcon.setColorFilter(ContextCompat.getColor(context, R.color.yellow_600))
+            }
         }
     }
 
