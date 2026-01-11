@@ -1,19 +1,20 @@
-package com.example.forenscan
+package com.example.forenscan.ui.fragments
 
-import android.annotation.SuppressLint
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.toColorInt
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.forenscan.databinding.FragmentDashboardBinding
-import com.example.forenscan.databinding.CardMetricBinding
+import com.example.forenscan.NetworksFragment
+import com.example.forenscan.R
 import com.example.forenscan.data.ActivityItem
-import com.example.forenscan.ui.ActivityAdapter
-import android.graphics.Color
-import androidx.core.graphics.toColorInt
+import com.example.forenscan.databinding.CardMetricBinding
+import com.example.forenscan.databinding.FragmentDashboardBinding
+import com.example.forenscan.ui.adapters.ActivityAdapter
 
 class DashboardFragment : Fragment() {
 
@@ -209,9 +210,24 @@ class DashboardFragment : Fragment() {
     // --- Recent Activity Setup ---
     private fun setupRecentActivity() {
         val activityList = listOf(
-            ActivityItem("Evil Twin Detected", "Suspicious network \"SM_Mall_WIFI\" found", "Critical", "2 min ago"),
-            ActivityItem("Network Scan Completed", "23 networks analyzed, 2 threats found", null, "5 min ago"),
-            ActivityItem("Connected to WiFi", "Successfully connected to secure network", null, "15 min ago"),
+            ActivityItem(
+                "Evil Twin Detected",
+                "Suspicious network \"SM_Mall_WIFI\" found",
+                "Critical",
+                "2 min ago"
+            ),
+            ActivityItem(
+                "Network Scan Completed",
+                "23 networks analyzed, 2 threats found",
+                null,
+                "5 min ago"
+            ),
+            ActivityItem(
+                "Connected to WiFi",
+                "Successfully connected to secure network",
+                null,
+                "15 min ago"
+            ),
             ActivityItem("Protection Enabled", "Real-time monitoring activated", null, "1 hr ago")
         )
 

@@ -1,4 +1,4 @@
-package com.example.forenscan
+package com.example.forenscan.ui.fragments
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,6 +7,9 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.forenscan.R
+import com.example.forenscan.ui.adapters.AlertItem
+import com.example.forenscan.ui.adapters.AlertsAdapter
 
 class AlertsFragment : Fragment() {
 
