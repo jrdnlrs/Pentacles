@@ -1,59 +1,67 @@
 package com.example.forenscan
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [AlertsFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class AlertsFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_alerts, container, false)
-    }
+        // 1. Inflate the layout for this fragment
+        val view = inflater.inflate(R.layout.fragment_alerts, container, false)
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment AlertsFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            AlertsFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+        // 2. Find the RecyclerView
+        val recyclerView = view.findViewById<RecyclerView>(R.id.alerts_recycler_view)
+
+        // 3. Create Mock Data (This matches your AlertItem class in AlertsAdapter.kt)
+        val mockData = listOf(
+            AlertItem(
+                title = "Evil Twin Attack Detected",
+                description = "Duplicate SSID 'SM_Mall_WiFi' detected with suspicious MAC address",
+                type = "Evil Twin",
+                severity = "CRITICAL",
+                ssid = "SM_Mall_WiFi",
+                location = "SM North EDSA, Quezon City",
+                timeAgo = "2 minutes ago",
+                macAddress = "00:1A:2B:3C:4D:5F",
+                recommendedAction = "Disconnect immediately and connect only to the legitimate network"
+            ),
+            AlertItem(
+                title = "Suspicious Network Activity",
+                description = "Unusual DNS requests detected from connected device",
+                type = "Suspicious Activity",
+                severity = "HIGH",
+                ssid = "UP_Guest_Network",
+                location = "University of the Philippines Diliman",
+                timeAgo = "1 hour ago",
+                macAddress = "00:3C:4D:5E:6F:7A",
+                recommendedAction = "Monitor network traffic and consider disconnecting"
+            ),
+            AlertItem(
+                title = "Weak Encryption Detected",
+                description = "Network using outdated WEP encryption protocol",
+                type = "Weak Encryption",
+                severity = "MEDIUM",
+                ssid = "Barangay_Free_WiFi",
+                location = "Barangay Commonwealth, QC",
+                timeAgo = "15 minutes ago",
+                macAddress = "00:2B:3C:4D:5E:6F",
+                recommendedAction = "Avoid transmitting sensitive data on this network"
+            )
+        )
+
+        // 4. Set up the RecyclerView with the Adapter
+        // Note: No import needed for AlertsAdapter because it's in the same package!
+        recyclerView.layoutManager = LinearLayoutManager(context)
+        recyclerView.adapter = AlertsAdapter(mockData)
+
+        return view
     }
 }

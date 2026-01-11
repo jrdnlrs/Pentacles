@@ -7,8 +7,7 @@
     <color name="purple_700">#FF3700B3</color>
     <color name="indigo_500">#6366F1</color>
     <color name="indigo_600">#4F46E5</color>
-    <color name="chip_text_color">#1E293B</color>
-    <color name="chip_background_color">#F1F5F9</color>
+
 
     <color name="background_light">#F0F3F7</color>
     <color name="gray_200">#E2E8F0</color>
@@ -28,5 +27,12 @@
     <color name="chip_text_color">#FFFFFF</color>
     <color name="chip_background_color">#6A1B9A</color>
     <color name="switch_track_color">#E2E8F0</color>
+
+    <color name="red_700">#B91C1C</color>
+    <color name="red_600">#DC2626</color>
+    <color name="orange_700">#C2410C</color>
+    <color name="orange_600">#EA580C</color>
+    <color name="yellow_600">#CA8A04</color>
+    <color name="slate_600">#475569</color>
 
 </resources>
