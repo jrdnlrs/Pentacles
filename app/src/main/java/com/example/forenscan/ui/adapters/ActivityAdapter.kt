@@ -1,14 +1,13 @@
-package com.example.forenscan.ui
+package com.example.forenscan.ui.adapters
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import androidx.core.graphics.toColorInt
 import androidx.recyclerview.widget.RecyclerView
+import com.example.forenscan.R
 import com.example.forenscan.data.ActivityItem
 import com.example.forenscan.databinding.ItemActivityEventBinding
-import android.graphics.Color
-import android.view.View
-import com.example.forenscan.R
-import androidx.core.graphics.toColorInt
 
 class ActivityAdapter(private val items: List<ActivityItem>) : RecyclerView.Adapter<ActivityAdapter.ActivityViewHolder>() {
 
@@ -19,13 +18,19 @@ class ActivityAdapter(private val items: List<ActivityItem>) : RecyclerView.Adap
 
     override fun onBindViewHolder(holder: ActivityViewHolder, position: Int) {
         val item = items[position]
+
+        // We use 'apply', so 'this' refers to holder.binding
         holder.binding.apply {
+            // ERROR WAS HERE: Do not use ItemActivityEventBinding.titleText
+            // CORRECT: Just use the view ID directly
             titleText.text = item.title
             descriptionText.text = item.description
             timeText.text = item.timestamp
 
+            // Handle timeline visibility
             timelineLine.visibility = if (position == items.size - 1) View.GONE else View.VISIBLE
 
+            // Handle alert chip
             if (item.severity != null) {
                 alertStatusChip.text = item.severity
                 alertStatusChip.visibility = View.VISIBLE
@@ -33,6 +38,7 @@ class ActivityAdapter(private val items: List<ActivityItem>) : RecyclerView.Adap
                 alertStatusChip.visibility = View.GONE
             }
 
+            // Handle icons
             when {
                 item.severity == "Critical" -> {
                     iconView.setImageResource(R.drawable.ic_warning)

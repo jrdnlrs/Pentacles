@@ -1,4 +1,4 @@
-package com.example.forenscan
+package com.example.forenscan.ui.adapters
 
 import android.view.LayoutInflater
 import android.view.View
@@ -7,6 +7,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
+import com.example.forenscan.R
 
 // 1. Data Model
 data class AlertItem(
