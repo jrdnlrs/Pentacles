@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="16dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="0dp"
+    app:strokeWidth="1dp"
+    app:strokeColor="#E2E8F0"
+    app:cardBackgroundColor="#F8F7FA">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <ImageView
+            android:id="@+id/img_alert_icon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/warning"
+            app:tint="#EF4444"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/text_alert_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:text="Evil Twin Attack Detected"
+            android:textColor="#0F172A"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/img_alert_icon"
+            app:layout_constraintTop_toTopOf="@+id/img_alert_icon"
+            app:layout_constraintBottom_toBottomOf="@+id/img_alert_icon"/>
+
+        <LinearLayout
+            android:id="@+id/layout_badges"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="12dp"
+            app:layout_constraintStart_toStartOf="@+id/text_alert_title"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/text_alert_title">
+
+            <TextView
+                android:id="@+id/badge_type"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/badge_neutral_bg"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="4dp"
+                android:text="Evil Twin"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:textColor="#475569"
+                android:layout_marginEnd="8dp"/>
+
+            <TextView
+                android:id="@+id/badge_severity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/badge_critical_bg"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="4dp"
+                android:text="CRITICAL"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:textColor="#B91C1C"/>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/text_description"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Duplicate SSID 'SM_Mall_WiFi' detected with suspicious MAC address"
+            android:textColor="#334155"
+            android:textSize="14sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/layout_badges"/>
+
+        <ImageView
+            android:id="@+id/icon_wifi"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginTop="16dp"
+            android:src="@drawable/outline_shield_24"
+            app:tint="#64748B"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/text_description"/>
+
+        <TextView
+            android:id="@+id/text_ssid"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="SM_Mall_WiFi"
+            android:textSize="13sp"
+            android:textColor="#475569"
+            app:layout_constraintStart_toEndOf="@+id/icon_wifi"
+            app:layout_constraintTop_toTopOf="@+id/icon_wifi"
+            app:layout_constraintBottom_toBottomOf="@+id/icon_wifi"/>
+
+        <ImageView
+            android:id="@+id/icon_location"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginStart="24dp"
+            android:src="@drawable/outline_shield_24"
+            app:tint="#64748B"
+            app:layout_constraintStart_toEndOf="@+id/text_ssid"
+            app:layout_constraintTop_toTopOf="@+id/icon_wifi"/>
+
+        <TextView
+            android:id="@+id/text_location"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="SM North EDSA, QC"
+            android:textSize="13sp"
+            android:textColor="#475569"
+            android:ellipsize="end"
+            android:maxLines="1"
+            app:layout_constraintStart_toEndOf="@+id/icon_location"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/icon_wifi"
+            app:layout_constraintBottom_toBottomOf="@+id/icon_wifi"/>
+
+        <ImageView
+            android:id="@+id/icon_time"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginTop="12dp"
+            android:src="@drawable/outline_shield_24"
+            app:tint="#64748B"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/icon_wifi"/>
+
+        <TextView
+            android:id="@+id/text_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="2 minutes ago"
+            android:textSize="13sp"
+            android:textColor="#475569"
+            app:layout_constraintStart_toEndOf="@+id/icon_time"
+            app:layout_constraintTop_toTopOf="@+id/icon_time"
+            app:layout_constraintBottom_toBottomOf="@+id/icon_time"/>
+
+        <TextView
+            android:id="@+id/text_mac"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:text="00:1A:2B:3C:4D:5F"
+            android:textSize="13sp"
+            android:fontFamily="monospace"
+            android:textColor="#475569"
+            app:layout_constraintStart_toEndOf="@+id/text_time"
+            app:layout_constraintTop_toTopOf="@+id/icon_time"
+            app:layout_constraintBottom_toBottomOf="@+id/icon_time"/>
+
+        <LinearLayout
+            android:id="@+id/box_action"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bg_rounded_gray"
+            android:padding="16dp"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@+id/icon_time">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Recommended Action:"
+                android:textStyle="bold"
+                android:textColor="#E2E8F0"
+                android:textSize="13sp"/>
+
+            <TextView
+                android:id="@+id/text_action"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Disconnect immediately and connect only to the legitimate network"
+                android:textColor="#CBD5E1"
+                android:textSize="13sp"
+                android:layout_marginTop="4dp"/>
+        </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_details"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="View Details"
+            android:textColor="#334155"
+            android:textSize="12sp"
+            app:strokeColor="#CBD5E1"
+            app:cornerRadius="20dp"
+            app:layout_constraintTop_toBottomOf="@+id/box_action"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/btn_resolve"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_resolve"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Mark Resolved"
+            android:textColor="@android:color/white"
+            android:textSize="12sp"
+            app:backgroundTint="#10B981"
+            app:cornerRadius="20dp"
+            app:layout_constraintTop_toBottomOf="@+id/box_action"
+            app:layout_constraintStart_toEndOf="@+id/btn_details"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.google.android.material.card.MaterialCardView>

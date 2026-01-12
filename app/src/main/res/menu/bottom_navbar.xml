@@ -2,23 +2,23 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/dashboard"
+        android:id="@+id/navigation_dashboard"
         android:title="Dashboard"
-        android:icon="@drawable/dashboard_ic_activity" />
+        android:icon="@drawable/outline_shield_24"/>
 
     <item
-        android:id="@+id/alerts"
+        android:id="@+id/navigation_alerts"
         android:title="Alerts"
-        android:icon="@drawable/settings_ic_bell" />
+        android:icon="@drawable/warning"/>
 
     <item
-        android:id="@+id/learn"
+        android:id="@+id/navigation_learn"
         android:title="Learn"
-        android:icon="@drawable/dashboard_ic_shield" />
+        android:icon="@drawable/learn"/>
 
     <item
-        android:id="@+id/settings"
+        android:id="@+id/navigation_settings"
         android:title="Settings"
-        android:icon="@drawable/dashboard_ic_scan" />
+        android:icon="@drawable/settings"/>
 
 </menu>
