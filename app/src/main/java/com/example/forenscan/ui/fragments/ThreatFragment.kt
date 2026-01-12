@@ -8,7 +8,7 @@ import androidx.fragment.app.Fragment
 import com.example.forenscan.R
 import com.google.android.material.button.MaterialButtonToggleGroup
 
-class ThreatsFragment : Fragment() {
+class ThreatFragment : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

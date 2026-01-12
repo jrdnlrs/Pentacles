@@ -6,8 +6,12 @@ import android.view.ViewGroup
 import androidx.core.graphics.toColorInt
 import androidx.recyclerview.widget.RecyclerView
 import com.example.forenscan.R
-import com.example.forenscan.data.ActivityItem
+import com.example.forenscan.data.models.ActivityItem
+import com.example.forenscan.data.models.ActivityType
 import com.example.forenscan.databinding.ItemActivityEventBinding
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class ActivityAdapter(private val items: List<ActivityItem>) : RecyclerView.Adapter<ActivityAdapter.ActivityViewHolder>() {
 
@@ -19,46 +23,51 @@ class ActivityAdapter(private val items: List<ActivityItem>) : RecyclerView.Adap
     override fun onBindViewHolder(holder: ActivityViewHolder, position: Int) {
         val item = items[position]
 
-        // We use 'apply', so 'this' refers to holder.binding
         holder.binding.apply {
-            // ERROR WAS HERE: Do not use ItemActivityEventBinding.titleText
-            // CORRECT: Just use the view ID directly
             titleText.text = item.title
             descriptionText.text = item.description
-            timeText.text = item.timestamp
+
+            // FIXED: Format the Long timestamp to a String
+            val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
+            timeText.text = sdf.format(Date(item.timestamp))
 
             // Handle timeline visibility
             timelineLine.visibility = if (position == items.size - 1) View.GONE else View.VISIBLE
 
-            // Handle alert chip
-            if (item.severity != null) {
-                alertStatusChip.text = item.severity
-                alertStatusChip.visibility = View.VISIBLE
-            } else {
-                alertStatusChip.visibility = View.GONE
-            }
+            // FIXED: Use 'item.type' instead of 'item.severity'
+            when (item.type) {
+                ActivityType.THREAT_DETECTED -> {
+                    // Critical / Alert styling
+                    alertStatusChip.text = "ALERT"
+                    alertStatusChip.visibility = View.VISIBLE
 
-            // Handle icons
-            when {
-                item.severity == "Critical" -> {
                     iconView.setImageResource(R.drawable.ic_warning)
-                    iconView.setColorFilter("#F44336".toColorInt())
+                    iconView.setColorFilter("#F44336".toColorInt()) // Red
                 }
-                item.title.contains("Protection") -> {
+                ActivityType.PROTECTION_ENABLED -> {
+                    alertStatusChip.visibility = View.GONE
+
                     iconView.setImageResource(R.drawable.ic_shield)
-                    iconView.setColorFilter("#4CAF50".toColorInt())
+                    iconView.setColorFilter("#4CAF50".toColorInt()) // Green
                 }
-                item.title.contains("Scan") -> {
-                    iconView.setImageResource(R.drawable.ic_activity)
-                    iconView.setColorFilter("#2196F3".toColorInt())
-                }
-                item.title.contains("WiFi") || item.title.contains("Connected") -> {
+                ActivityType.WIFI_CONNECTED -> {
+                    alertStatusChip.visibility = View.GONE
+
                     iconView.setImageResource(R.drawable.ic_wifi)
-                    iconView.setColorFilter("#4CAF50".toColorInt())
+                    iconView.setColorFilter("#4CAF50".toColorInt()) // Green
+                }
+                ActivityType.SCAN_COMPLETED -> {
+                    alertStatusChip.visibility = View.GONE
+
+                    iconView.setImageResource(R.drawable.ic_activity) // Or scan icon
+                    iconView.setColorFilter("#2196F3".toColorInt()) // Blue
                 }
                 else -> {
+                    // System Status Change / Default
+                    alertStatusChip.visibility = View.GONE
+
                     iconView.setImageResource(R.drawable.ic_activity)
-                    iconView.setColorFilter("#666666".toColorInt())
+                    iconView.setColorFilter("#666666".toColorInt()) // Grey
                 }
             }
         }

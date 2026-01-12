@@ -1,4 +1,4 @@
-package com.example.forenscan
+package com.example.forenscan.data.models
 
 enum class NetworkClassification {
     SAFE,
@@ -13,5 +13,8 @@ data class WifiNetwork(
     val frequency: String,
     val signalStrength: Int,
     val classification: NetworkClassification,
-    val isConnected: Boolean = false
+    val isConnected: Boolean = false,
+    val isDuplicate: Boolean = false,
+    val lastSeen: Long = System.currentTimeMillis(),
+    val timestamp: String = ""
 )
