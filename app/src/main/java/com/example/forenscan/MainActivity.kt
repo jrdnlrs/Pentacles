@@ -17,7 +17,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
-
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
@@ -50,7 +49,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 R.id.navigation_settings -> {
                     // Point to the correct fragment
-                   // replaceFragment(SettingsFragment())
+                   replaceFragment(SettingsFragment())
                     true
                 }
                 else -> false
@@ -58,9 +57,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // 4. Helper function to swap the fragments
     private fun replaceFragment(fragment: Fragment) {
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, fragment)
-            .commit()
+        val fragmentManager = supportFragmentManager
+        val fragmentTransaction = fragmentManager.beginTransaction()
+
+        fragmentTransaction.replace(R.id.frame_layout, fragment)
+        fragmentTransaction.commit()
     }
 }

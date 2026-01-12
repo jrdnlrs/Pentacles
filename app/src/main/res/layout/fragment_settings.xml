@@ -4,403 +4,749 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true">
-
-<!--    <LinearLayout-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:orientation="vertical"-->
-<!--        android:padding="16dp">-->
-
-<!--        &lt;!&ndash; Header &ndash;&gt;-->
-<!--        <TextView-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:text="@string/settings"-->
-<!--            android:textSize="28sp"-->
-<!--            android:textStyle="bold"-->
-<!--            android:textColor="@android:color/white"-->
-<!--            android:layout_marginBottom="16dp" />-->
-
-<!--        &lt;!&ndash; App Appearance Section &ndash;&gt;-->
-<!--        <androidx.cardview.widget.CardView-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_marginBottom="16dp"-->
-<!--            app:cardCornerRadius="20dp"-->
-<!--            app:cardElevation="4dp"-->
-<!--            android:background="@drawable/glass_card_background">-->
-
-<!--            <LinearLayout-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:orientation="vertical"-->
-<!--                android:padding="16dp"-->
-<!--                android:background="@drawable/gradient_card_dark">-->
-
-<!--                <LinearLayout-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:orientation="horizontal"-->
-<!--                    android:gravity="center_vertical"-->
-<!--                    android:layout_marginBottom="12dp">-->
-
-<!--                    <ImageView-->
-<!--                        android:layout_width="24dp"-->
-<!--                        android:layout_height="24dp"-->
-<!--                        android:src="@drawable/ic_palette"-->
-<!--                        app:tint="#6366F1"-->
-<!--                        android:layout_marginEnd="12dp" />-->
-
-<!--                    <TextView-->
-<!--                        android:layout_width="wrap_content"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:text="@string/app_appearance"-->
-<!--                        android:textSize="18sp"-->
-<!--                        android:textStyle="bold"-->
-<!--                        android:textColor="@android:color/white" />-->
-
-<!--                </LinearLayout>-->
-
-<!--                &lt;!&ndash; Dark Mode Setting &ndash;&gt;-->
-<!--                <LinearLayout-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:orientation="horizontal"-->
-<!--                    android:gravity="center_vertical"-->
-<!--                    android:paddingVertical="12dp">-->
-
-<!--                    <LinearLayout-->
-<!--                        android:layout_width="0dp"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:layout_weight="1"-->
-<!--                        android:orientation="vertical">-->
-
-<!--                        <TextView-->
-<!--                            android:layout_width="wrap_content"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:text="@string/dark_mode"-->
-<!--                            android:textSize="16sp"-->
-<!--                            android:textStyle="bold"-->
-<!--                            android:textColor="@android:color/white" />-->
-
-<!--                        <TextView-->
-<!--                            android:layout_width="wrap_content"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:text="@string/dark_mode_description"-->
-<!--                            android:textSize="14sp"-->
-<!--                            android:textColor="#CBD5E1"-->
-<!--                            android:layout_marginTop="4dp" />-->
-
-<!--                    </LinearLayout>-->
-
-<!--                    <com.google.android.material.switchmaterial.SwitchMaterial-->
-<!--                        android:id="@+id/dark_mode_switch"-->
-<!--                        android:layout_width="wrap_content"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:checked="true"-->
-<!--                        app:thumbTint="@android:color/white"-->
-<!--                        app:trackTint="@color/switch_track_color" />-->
-
-<!--                </LinearLayout>-->
-
-<!--            </LinearLayout>-->
-
-<!--        </androidx.cardview.widget.CardView>-->
-
-<!--        &lt;!&ndash; Protection Settings Section &ndash;&gt;-->
-<!--        <androidx.cardview.widget.CardView-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_marginBottom="16dp"-->
-<!--            app:cardCornerRadius="20dp"-->
-<!--            app:cardElevation="4dp"-->
-<!--            android:background="@drawable/glass_card_background">-->
-
-<!--            <LinearLayout-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:orientation="vertical"-->
-<!--                android:padding="16dp"-->
-<!--                android:background="@drawable/gradient_card_dark">-->
-
-<!--                <LinearLayout-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:orientation="horizontal"-->
-<!--                    android:gravity="center_vertical"-->
-<!--                    android:layout_marginBottom="12dp">-->
-
-<!--                    <ImageView-->
-<!--                        android:layout_width="24dp"-->
-<!--                        android:layout_height="24dp"-->
-<!--                        android:src="@drawable/ic_shield"-->
-<!--                        app:tint="#6366F1"-->
-<!--                        android:layout_marginEnd="12dp" />-->
-
-<!--                    <TextView-->
-<!--                        android:layout_width="wrap_content"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:text="@string/protection_settings"-->
-<!--                        android:textSize="18sp"-->
-<!--                        android:textStyle="bold"-->
-<!--                        android:textColor="@android:color/white" />-->
-
-<!--                </LinearLayout>-->
-
-<!--                &lt;!&ndash; Real-time Monitoring &ndash;&gt;-->
-<!--                <LinearLayout-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:orientation="horizontal"-->
-<!--                    android:gravity="center_vertical"-->
-<!--                    android:paddingVertical="12dp">-->
-
-<!--                    <LinearLayout-->
-<!--                        android:layout_width="0dp"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:layout_weight="1"-->
-<!--                        android:orientation="vertical">-->
-
-<!--                        <TextView-->
-<!--                            android:layout_width="wrap_content"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:text="@string/real_time_monitoring"-->
-<!--                            android:textSize="16sp"-->
-<!--                            android:textStyle="bold"-->
-<!--                            android:textColor="@android:color/white" />-->
-
-<!--                        <TextView-->
-<!--                            android:layout_width="wrap_content"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:text="@string/real_time_monitoring_description"-->
-<!--                            android:textSize="14sp"-->
-<!--                            android:textColor="#CBD5E1"-->
-<!--                            android:layout_marginTop="4dp" />-->
-
-<!--                    </LinearLayout>-->
-
-<!--                    <com.google.android.material.switchmaterial.SwitchMaterial-->
-<!--                        android:id="@+id/real_time_monitoring_switch"-->
-<!--                        android:layout_width="wrap_content"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:checked="true"-->
-<!--                        app:thumbTint="@android:color/white"-->
-<!--                        app:trackTint="@color/switch_track_color" />-->
-
-<!--                </LinearLayout>-->
-
-<!--                <View-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="1dp"-->
-<!--                    android:background="#FFFFFF1A" />-->
-
-<!--                &lt;!&ndash; Background Scanning &ndash;&gt;-->
-<!--                <LinearLayout-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:orientation="horizontal"-->
-<!--                    android:gravity="center_vertical"-->
-<!--                    android:paddingVertical="12dp">-->
-
-<!--                    <LinearLayout-->
-<!--                        android:layout_width="0dp"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:layout_weight="1"-->
-<!--                        android:orientation="vertical">-->
-
-<!--                        <TextView-->
-<!--                            android:layout_width="wrap_content"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:text="@string/background_scanning"-->
-<!--                            android:textSize="16sp"-->
-<!--                            android:textStyle="bold"-->
-<!--                            android:textColor="@android:color/white" />-->
-
-<!--                        <TextView-->
-<!--                            android:layout_width="wrap_content"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:text="@string/background_scanning_description"-->
-<!--                            android:textSize="14sp"-->
-<!--                            android:textColor="#CBD5E1"-->
-<!--                            android:layout_marginTop="4dp" />-->
-
-<!--                    </LinearLayout>-->
-
-<!--                    <com.google.android.material.switchmaterial.SwitchMaterial-->
-<!--                        android:id="@+id/background_scanning_switch"-->
-<!--                        android:layout_width="wrap_content"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:checked="true"-->
-<!--                        app:thumbTint="@android:color/white"-->
-<!--                        app:trackTint="@color/switch_track_color" />-->
-
-<!--                </LinearLayout>-->
-
-<!--                <View-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="1dp"-->
-<!--                    android:background="#FFFFFF1A" />-->
-
-<!--                &lt;!&ndash; Scan Interval &ndash;&gt;-->
-<!--                <LinearLayout-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:orientation="vertical"-->
-<!--                    android:paddingVertical="12dp">-->
-
-<!--                    <TextView-->
-<!--                        android:layout_width="wrap_content"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:text="@string/scan_interval"-->
-<!--                        android:textSize="16sp"-->
-<!--                        android:textStyle="bold"-->
-<!--                        android:textColor="@android:color/white"-->
-<!--                        android:layout_marginBottom="4dp" />-->
-
-<!--                    <TextView-->
-<!--                        android:layout_width="wrap_content"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:text="@string/scan_interval_description"-->
-<!--                        android:textSize="14sp"-->
-<!--                        android:textColor="#CBD5E1"-->
-<!--                        android:layout_marginBottom="12dp" />-->
-
-<!--                    <Spinner-->
-<!--                        android:id="@+id/scan_interval_spinner"-->
-<!--                        android:layout_width="match_parent"-->
-<!--                        android:layout_height="48dp"-->
-<!--                        android:background="@drawable/spinner_background"-->
-<!--                        android:popupBackground="@drawable/spinner_popup_background" />-->
-
-<!--                </LinearLayout>-->
-
-<!--            </LinearLayout>-->
-
-<!--        </androidx.cardview.widget.CardView>-->
-
-<!--        &lt;!&ndash; Notifications Section &ndash;&gt;-->
-<!--        <androidx.cardview.widget.CardView-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_marginBottom="16dp"-->
-<!--            app:cardCornerRadius="20dp"-->
-<!--            app:cardElevation="4dp"-->
-<!--            android:background="@drawable/glass_card_background">-->
-
-<!--            <LinearLayout-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:orientation="vertical"-->
-<!--                android:padding="16dp"-->
-<!--                android:background="@drawable/gradient_card_dark">-->
-
-<!--                <LinearLayout-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:orientation="horizontal"-->
-<!--                    android:gravity="center_vertical"-->
-<!--                    android:layout_marginBottom="12dp">-->
-
-<!--                    <ImageView-->
-<!--                        android:layout_width="24dp"-->
-<!--                        android:layout_height="24dp"-->
-<!--                        android:src="@drawable/ic_bell"-->
-<!--                        app:tint="#6366F1"-->
-<!--                        android:layout_marginEnd="12dp" />-->
-
-<!--                    <TextView-->
-<!--                        android:layout_width="wrap_content"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:text="@string/notifications"-->
-<!--                        android:textSize="18sp"-->
-<!--                        android:textStyle="bold"-->
-<!--                        android:textColor="@android:color/white" />-->
-
-<!--                </LinearLayout>-->
-
-<!--                &lt;!&ndash; Threat Alerts &ndash;&gt;-->
-<!--                <LinearLayout-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:orientation="horizontal"-->
-<!--                    android:gravity="center_vertical"-->
-<!--                    android:paddingVertical="12dp">-->
-
-<!--                    <LinearLayout-->
-<!--                        android:layout_width="0dp"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:layout_weight="1"-->
-<!--                        android:orientation="vertical">-->
-
-<!--                        <TextView-->
-<!--                            android:layout_width="wrap_content"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:text="@string/threat_alerts"-->
-<!--                            android:textSize="16sp"-->
-<!--                            android:textStyle="bold"-->
-<!--                            android:textColor="@android:color/white" />-->
-
-<!--                        <TextView-->
-<!--                            android:layout_width="wrap_content"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:text="@string/threat_alerts_description"-->
-<!--                            android:textSize="14sp"-->
-<!--                            android:textColor="#CBD5E1"-->
-<!--                            android:layout_marginTop="4dp" />-->
-
-<!--                    </LinearLayout>-->
-
-<!--                    <com.google.android.material.switchmaterial.SwitchMaterial-->
-<!--                        android:id="@+id/threat_notifications_switch"-->
-<!--                        android:layout_width="wrap_content"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:checked="true"-->
-<!--                        app:thumbTint="@android:color/white"-->
-<!--                        app:trackTint="@color/switch_track_color" />-->
-
-<!--                </LinearLayout>-->
-
-<!--            </LinearLayout>-->
-
-<!--        </androidx.cardview.widget.CardView>-->
-
-<!--        &lt;!&ndash; Philippine Compliance Notice &ndash;&gt;-->
-<!--        <androidx.cardview.widget.CardView-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            app:cardCornerRadius="20dp"-->
-<!--            app:cardElevation="4dp"-->
-<!--            android:background="@drawable/glass_card_background">-->
-
-<!--            <LinearLayout-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:orientation="vertical"-->
-<!--                android:padding="16dp"-->
-<!--                android:background="@drawable/gradient_card_info">-->
-
-<!--                <TextView-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:text="🛡️ Philippine Compliance"-->
-<!--                    android:textSize="16sp"-->
-<!--                    android:textStyle="bold"-->
-<!--                    android:textColor="#6366F1"-->
-<!--                    android:layout_marginBottom="8dp" />-->
-
-<!--                <TextView-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:text="• Data Privacy Act of 2012: Data processed locally\n• Cybercrime Prevention Act: Compliant\n• NTC Regulations: Network monitoring authorized"-->
-<!--                    android:textSize="14sp"-->
-<!--                    android:textColor="#CBD5E1"-->
-<!--                    android:lineSpacingExtra="4dp" />-->
-
-<!--            </LinearLayout>-->
-
-<!--        </androidx.cardview.widget.CardView>-->
-
-<!--    </LinearLayout>-->
+    android:fillViewport="true"
+    android:background="@color/background_light">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Header -->
+
+        <!-- App Appearance Section -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="4dp"
+            android:background="@drawable/glass_card_background">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="237dp"
+                android:background="@drawable/gradient_card_light"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_marginEnd="12dp"
+                        android:src="@drawable/settings_ic_palette"
+                        app:tint="#6366F1" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="App Appearances"
+                        android:textColor="@color/text_primary_light"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingVertical="12dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Dark Mode"
+                            android:textColor="@color/text_primary_light"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="Switch between light and dark themes"
+                            android:textColor="@color/text_secondary_light"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/dark_mode_switch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        app:thumbTint="@color/switch_thumb_selector"
+                        app:trackTint="@color/switch_track_selector" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="82dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/bg_info_box_light"
+                    android:orientation="horizontal"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="12dp"
+                        android:text="🎨"
+                        android:textSize="18sp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:lineSpacingExtra="2dp"
+                        android:text="Theme preference is automatically saved and applied across app sessions"
+                        android:textColor="#312E81"
+                        android:textSize="13sp" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Protection Settings -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="4dp"
+            android:background="@drawable/glass_card_background">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:background="@drawable/gradient_card_light">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/settings_ic_bell"
+                        app:tint="#6366F1"
+                        android:layout_marginEnd="12dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Protection Settings"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/text_primary_light" />
+
+                </LinearLayout>
+
+                <!-- PS: Sub settings -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingVertical="12dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Real-time Monitoring"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/text_primary_light" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Continuously scan for Evil Twin attacks"
+                            android:textSize="14sp"
+                            android:textColor="@color/text_secondary_light"
+                            android:layout_marginTop="4dp" />
+
+                    </LinearLayout>
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/real_time_monitoring_switch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        app:thumbTint="@color/switch_thumb_selector"
+                        app:trackTint="@color/switch_track_selector" />
+
+
+                </LinearLayout>
+
+                <!-- PS: Sub settings 2 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingVertical="12dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Background Scanning"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/text_primary_light" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Scan networks even when app is minimized"
+                            android:textSize="14sp"
+                            android:textColor="@color/text_secondary_light"
+                            android:layout_marginTop="4dp" />
+
+                    </LinearLayout>
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/background_scanning_switch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        app:thumbTint="@color/switch_thumb_selector"
+                        app:trackTint="@color/switch_track_selector" />
+
+                </LinearLayout>
+
+                <!-- PS: Sub settings 3 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingVertical="12dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Scan Interval"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/text_primary_light" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="How often to automatically scan for networks"
+                            android:textSize="14sp"
+                            android:textColor="@color/text_secondary_light"
+                            android:layout_marginTop="4dp" />
+
+                        <androidx.appcompat.widget.AppCompatSpinner
+                            android:id="@+id/background_scan_spinner"
+                            android:layout_width="match_parent"
+                            android:layout_height="40dp"
+                            android:layout_marginTop="15dp"
+
+                            android:background="@drawable/bg_spinner_dark"
+                            android:popupBackground="@drawable/bg_spinner_dropdown"
+
+                            android:entries="@array/scan_intervals"
+                            android:gravity="center_vertical"
+                            android:overlapAnchor="false"
+                            android:paddingStart="16dp"
+                            android:paddingEnd="32dp"
+
+                            android:spinnerMode="dropdown"
+
+                             />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- Notifications Section -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="4dp"
+            android:background="@drawable/glass_card_background">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:background="@drawable/gradient_card_light">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/settings_ic_bell"
+                        app:tint="#6366F1"
+                        android:layout_marginEnd="12dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Notifications"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/text_primary_light" />
+
+                </LinearLayout>
+
+                <!-- Notif: Threat Alerts -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingVertical="12dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Threat Alerts"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/text_primary_light" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Get notified when threats are detected"
+                            android:textSize="14sp"
+                            android:textColor="@color/text_secondary_light"
+                            android:layout_marginTop="4dp" />
+
+                    </LinearLayout>
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/threat_notifications_switch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        app:thumbTint="@color/switch_thumb_selector"
+                        app:trackTint="@color/switch_track_selector" />
+
+                </LinearLayout>
+
+                <!-- Notif: Auto-connect -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingVertical="12dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Auto-connect Warnings"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/text_primary_light" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Block automatic connections to unsafe networks"
+                            android:textSize="14sp"
+                            android:textColor="@color/text_secondary_light"
+                            android:layout_marginTop="4dp" />
+
+                    </LinearLayout>
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/auto_connect_switch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        app:thumbTint="@color/switch_thumb_selector"
+                        app:trackTint="@color/switch_track_selector" />
+
+                </LinearLayout>
+
+
+            </LinearLayout>
+
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- Privacy & Data Section -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="4dp"
+            android:background="@drawable/glass_card_background">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:background="@drawable/gradient_card_light">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/settings_ic_bell"
+                        app:tint="#6366F1"
+                        android:layout_marginEnd="12dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Privacy &amp; Data"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/text_primary_light" />
+
+                </LinearLayout>
+
+                <!-- P&D: Data Collect -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingVertical="12dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Data Collection"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/text_primary_light" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Collect network logs for forensic analysis"
+                            android:textSize="14sp"
+                            android:textColor="@color/text_secondary_light"
+                            android:layout_marginTop="4dp" />
+
+                    </LinearLayout>
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/data_collections_switch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        app:thumbTint="@color/switch_thumb_selector"
+                        app:trackTint="@color/switch_track_selector" />
+
+                </LinearLayout>
+
+                <!-- P&D: Location Services -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingVertical="12dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Location Services"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/text_primary_light" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Include location data in threat reports"
+                            android:textSize="14sp"
+                            android:textColor="@color/text_secondary_light"
+                            android:layout_marginTop="4dp" />
+
+                    </LinearLayout>
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/Location_services_switch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        app:thumbTint="@color/switch_thumb_selector"
+                        app:trackTint="@color/switch_track_selector" />
+
+                </LinearLayout>
+
+                <!-- P&D: Data Retention Period -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingVertical="12dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Data Retention Period"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/text_primary_light" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="How long to keep forensic data (Data Privacy Act compliance)"
+                            android:textSize="14sp"
+                            android:textColor="@color/text_secondary_light"
+                            android:layout_marginTop="4dp" />
+
+                    </LinearLayout>
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/data_retention_switch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        app:thumbTint="@color/switch_thumb_selector"
+                        app:trackTint="@color/switch_track_selector" />
+
+                </LinearLayout>
+
+
+            </LinearLayout>
+
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- Export & Forensics -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="4dp"
+            android:background="@drawable/glass_card_background">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="247dp"
+                android:background="@drawable/gradient_card_light"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_marginEnd="12dp"
+                        android:src="@drawable/settings_ic_palette"
+                        app:tint="#6366F1" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Export &amp; Forensics"
+                        android:textColor="@color/text_primary_light"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingVertical="12dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Enable Report Export"
+                            android:textColor="@color/text_primary_light"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="Allow exporting forensic data (PDF, CSV)"
+                            android:textColor="@color/text_secondary_light"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/report_export_switch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        app:thumbTint="@color/switch_thumb_selector"
+                        app:trackTint="@color/switch_track_selector" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="95dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/settings_warning_box"
+                    android:orientation="horizontal"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="12dp"
+                        android:text="⚖️"
+                        android:textSize="18sp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:lineSpacingExtra="2dp"
+                        android:text="Exported data complies with Data Privacy Act of 2012 requirements. Professional reports suitable for CERT-PH incident reporting."
+                        android:textColor="#7A6327"
+                        android:textSize="13sp" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Philippine Compliance Notice -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="4dp"
+            android:background="@drawable/glass_card_background">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:background="@drawable/settings_compliance">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🛡️ Philippine Compliance"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="#5E30A4"
+                    android:layout_marginBottom="8dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="• Data Privacy Act of 2012: Your data is processed locally on device \n• Cybercrime Prevention Act: Threat data can be shared with authorities\n• NTC Regulations: Network monitoring complies with telecommunications laws\n• Location data is optional and only stored locally for threat analysis"
+                    android:textSize="14sp"
+                    android:textColor="@color/purple_200"
+                    android:lineSpacingExtra="5dp" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+    </LinearLayout>
 
 </androidx.core.widget.NestedScrollView>
