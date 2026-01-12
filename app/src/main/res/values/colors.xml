@@ -5,7 +5,6 @@
     <color name="indigo_600">#4F46E5</color>
 
 
-    <color name="background_light">#F0F3F7</color>
     <color name="gray_200">#E2E8F0</color>
     <color name="gray_500">#64748B</color>
     <color name="gray_600">#475569</color>
@@ -19,15 +18,11 @@
 
     <color name="scan_button_gradient_start">#7C4DFF</color>
     <color name="scan_button_gradient_end">#B388FF</color>
-
-    <color name="chip_text_color">#FFFFFF</color>
     <color name="chip_background_color">#6A1B9A</color>
     <color name="switch_track_color">#E2E8F0</color>
 
     <color name="red_700">#B91C1C</color>
-    <color name="red_600">#DC2626</color>
     <color name="orange_700">#C2410C</color>
-    <color name="orange_600">#EA580C</color>
     <color name="yellow_600">#CA8A04</color>
     <color name="slate_600">#475569</color>
 
@@ -181,9 +176,5 @@
     <!-- Loading Shimmer Colors -->
     <color name="shimmer_base">#1F1F1F</color>
     <color name="shimmer_highlight">#2A2A2A</color>
-
     <color name="chip_text_color">#FFFFFF</color>
-    <color name="chip_background_color">#2A2A2A</color>
-
-    <color name="switch_track_color">#374151</color>
 </resources>

@@ -1,4 +1,4 @@
-package com.example.forenscan
+package com.example.forenscan.ui.fragments
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -6,21 +6,22 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import androidx.fragment.app.Fragment
+import com.example.forenscan.R
 
-class Learn_LearnMoreFragment : Fragment() {
+class Learn_SecurityTipsFragment : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Ensure this matches the file you just created: fragment_learn_more
-        return inflater.inflate(R.layout.fragment_learn_more, container, false)
+        // If this is still red, go to "Build" menu -> "Clean Project"
+        return inflater.inflate(R.layout.fragment_learn_security_tips, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 1. App Guide Button -> Go BACK to Home
+        // 1. App Guide Button
         val appGuideBtn = view.findViewById<Button>(R.id.btn_app_guide)
         appGuideBtn.setOnClickListener {
             parentFragmentManager.beginTransaction()
@@ -29,15 +30,13 @@ class Learn_LearnMoreFragment : Fragment() {
                 .commit()
         }
 
-        // 2. Security Tips Button -> Go to Security Tips
-        val securityTipsBtn = view.findViewById<Button>(R.id.btn_security_tips)
-        securityTipsBtn.setOnClickListener {
+        // 2. Learn More Button
+        val learnMoreBtn = view.findViewById<Button>(R.id.btn_learn_more)
+        learnMoreBtn.setOnClickListener {
             parentFragmentManager.beginTransaction()
-                .replace(R.id.frame_layout, Learn_SecurityTipsFragment())
+                .replace(R.id.frame_layout, Learn_LearnMoreFragment())
                 .addToBackStack(null)
                 .commit()
         }
-
-        // Note: "Learn More" button does nothing because we are already here.
     }
 }

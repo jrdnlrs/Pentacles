@@ -1,4 +1,4 @@
-package com.example.forenscan
+package com.example.forenscan.ui.fragments
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -6,6 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import androidx.fragment.app.Fragment
+import com.example.forenscan.R
+import com.example.forenscan.ui.fragments.Learn_LearnMoreFragment
+import com.example.forenscan.ui.fragments.Learn_SecurityTipsFragment
 
 class LearnFragment : Fragment() {
 

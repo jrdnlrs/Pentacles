@@ -1,4 +1,4 @@
-package com.example.forenscan
+package com.example.forenscan.ui.fragments
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -6,22 +6,22 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import androidx.fragment.app.Fragment
-// DO NOT IMPORT android.R here!
+import com.example.forenscan.R
 
-class Learn_SecurityTipsFragment : Fragment() {
+class Learn_LearnMoreFragment : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // If this is still red, go to "Build" menu -> "Clean Project"
-        return inflater.inflate(R.layout.fragment_learn_security_tips, container, false)
+        // Ensure this matches the file you just created: fragment_learn_more
+        return inflater.inflate(R.layout.fragment_learn_more, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 1. App Guide Button
+        // 1. App Guide Button -> Go BACK to Home
         val appGuideBtn = view.findViewById<Button>(R.id.btn_app_guide)
         appGuideBtn.setOnClickListener {
             parentFragmentManager.beginTransaction()
@@ -30,13 +30,15 @@ class Learn_SecurityTipsFragment : Fragment() {
                 .commit()
         }
 
-        // 2. Learn More Button
-        val learnMoreBtn = view.findViewById<Button>(R.id.btn_learn_more)
-        learnMoreBtn.setOnClickListener {
+        // 2. Security Tips Button -> Go to Security Tips
+        val securityTipsBtn = view.findViewById<Button>(R.id.btn_security_tips)
+        securityTipsBtn.setOnClickListener {
             parentFragmentManager.beginTransaction()
-                .replace(R.id.frame_layout, Learn_LearnMoreFragment())
+                .replace(R.id.frame_layout, Learn_SecurityTipsFragment())
                 .addToBackStack(null)
                 .commit()
         }
+
+        // Note: "Learn More" button does nothing because we are already here.
     }
 }
