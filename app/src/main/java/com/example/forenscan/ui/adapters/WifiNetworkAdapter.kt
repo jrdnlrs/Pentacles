@@ -1,10 +1,13 @@
-package com.example.forenscan
+package com.example.forenscan.ui.adapters
 
 import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.example.forenscan.R
+import com.example.forenscan.data.models.NetworkClassification
+import com.example.forenscan.data.models.WifiNetwork
 import com.example.forenscan.databinding.ItemNetworkConnectionBinding
 
 class WifiNetworkAdapter(private val networks: List<WifiNetwork>) :

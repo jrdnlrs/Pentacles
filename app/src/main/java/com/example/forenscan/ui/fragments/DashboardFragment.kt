@@ -9,12 +9,13 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.toColorInt
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.forenscan.NetworksFragment
 import com.example.forenscan.R
-import com.example.forenscan.data.ActivityItem
+import com.example.forenscan.data.models.ActivityItem
+import com.example.forenscan.data.models.ActivityType // Import the Enum
 import com.example.forenscan.databinding.CardMetricBinding
 import com.example.forenscan.databinding.FragmentDashboardBinding
 import com.example.forenscan.ui.adapters.ActivityAdapter
+import java.util.UUID
 
 class DashboardFragment : Fragment() {
 
@@ -54,8 +55,6 @@ class DashboardFragment : Fragment() {
         setupTopNavigation()
 
         updateTabStyles(isNetworks = false)
-
-        setupTopNavigation()
     }
 
     // --- Metric Card Setup (Data, Icons, Hue) ---
@@ -209,26 +208,40 @@ class DashboardFragment : Fragment() {
 
     // --- Recent Activity Setup ---
     private fun setupRecentActivity() {
+        // Updated to use the new ActivityItem constructor with Enums and Long timestamps
+        val now = System.currentTimeMillis()
+        val oneMinute = 60 * 1000
+        val oneHour = 60 * oneMinute
+
         val activityList = listOf(
             ActivityItem(
-                "Evil Twin Detected",
-                "Suspicious network \"SM_Mall_WIFI\" found",
-                "Critical",
-                "2 min ago"
+                id = UUID.randomUUID().toString(),
+                title = "Evil Twin Detected",
+                description = "Suspicious network \"SM_Mall_WIFI\" found",
+                timestamp = now - (2 * oneMinute), // 2 mins ago
+                type = ActivityType.THREAT_DETECTED
             ),
             ActivityItem(
-                "Network Scan Completed",
-                "23 networks analyzed, 2 threats found",
-                null,
-                "5 min ago"
+                id = UUID.randomUUID().toString(),
+                title = "Network Scan Completed",
+                description = "23 networks analyzed, 2 threats found",
+                timestamp = now - (5 * oneMinute), // 5 mins ago
+                type = ActivityType.SCAN_COMPLETED
             ),
             ActivityItem(
-                "Connected to WiFi",
-                "Successfully connected to secure network",
-                null,
-                "15 min ago"
+                id = UUID.randomUUID().toString(),
+                title = "Connected to WiFi",
+                description = "Successfully connected to secure network",
+                timestamp = now - (15 * oneMinute), // 15 mins ago
+                type = ActivityType.WIFI_CONNECTED
             ),
-            ActivityItem("Protection Enabled", "Real-time monitoring activated", null, "1 hr ago")
+            ActivityItem(
+                id = UUID.randomUUID().toString(),
+                title = "Protection Enabled",
+                description = "Real-time monitoring activated",
+                timestamp = now - oneHour, // 1 hr ago
+                type = ActivityType.PROTECTION_ENABLED
+            )
         )
 
         binding.recentActivityRecycler.apply {

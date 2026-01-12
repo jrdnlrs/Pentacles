@@ -6,8 +6,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
-import com.example.forenscan.ui.fragments.AlertsFragment
 import com.example.forenscan.ui.fragments.DashboardFragment
+import com.example.forenscan.ui.fragments.LearnFragment
+//import com.example.forenscan.ui.fragments.SettingsFragment
+import com.example.forenscan.ui.fragments.ThreatFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {
@@ -24,6 +26,7 @@ class MainActivity : AppCompatActivity() {
 
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
 
+        // 1. Default Load
         if (savedInstanceState == null) {
             replaceFragment(DashboardFragment())
         }
@@ -36,21 +39,25 @@ class MainActivity : AppCompatActivity() {
                     true
                 }
                 R.id.navigation_alerts -> {
-                    replaceFragment(AlertsFragment())
+                    // CRITICAL CHANGE: Load ThreatsFragment (The Toggle Page)
+                    replaceFragment(ThreatFragment())
                     true
                 }
                 R.id.navigation_learn -> {
-                    replaceFragment(AlertsFragment())
+                    // Point to the correct fragment
+                    replaceFragment(LearnFragment())
                     true
                 }
                 R.id.navigation_settings -> {
-                replaceFragment(AlertsFragment())
-                true
-            }
+                    // Point to the correct fragment
+                   // replaceFragment(SettingsFragment())
+                    true
+                }
                 else -> false
             }
         }
     }
+
     private fun replaceFragment(fragment: Fragment) {
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, fragment)

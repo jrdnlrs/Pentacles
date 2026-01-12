@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F8F9FA">
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="4dp"
+        app:cardBackgroundColor="@android:color/white">
+
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/toggle_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:singleSelection="true"
+            app:selectionRequired="true"
+            app:checkedButton="@id/btn_alerts">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_alerts"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Alerts"
+                android:textColor="@color/toggle_text_selector"
+                app:icon="@drawable/warning"
+                app:iconTint="@color/toggle_text_selector"
+                android:paddingVertical="12dp"
+                android:textAllCaps="false"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_timeline"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Timeline"
+                android:textColor="@color/toggle_text_selector"
+                app:icon="@drawable/ic_launcher_foreground"
+                app:iconTint="@color/toggle_text_selector"
+                android:paddingVertical="12dp"
+                android:textAllCaps="false"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+        </com.google.android.material.button.MaterialButtonToggleGroup>
+
+    </androidx.cardview.widget.CardView>
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/threats_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</LinearLayout>
