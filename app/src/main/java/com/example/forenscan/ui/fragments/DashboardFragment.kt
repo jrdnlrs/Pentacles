@@ -5,28 +5,34 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.toColorInt
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.forenscan.R
 import com.example.forenscan.data.models.ActivityItem
-import com.example.forenscan.data.models.ActivityType // Import the Enum
+import com.example.forenscan.data.models.ActivityType
+import com.example.forenscan.data.models.ThreatAlert
 import com.example.forenscan.databinding.CardMetricBinding
 import com.example.forenscan.databinding.FragmentDashboardBinding
 import com.example.forenscan.ui.adapters.ActivityAdapter
+import com.example.forenscan.ui.viewmodel.FSViewModel
 import java.util.UUID
 
 class DashboardFragment : Fragment() {
 
     // --- View Binding Setup ---
     private var _binding: FragmentDashboardBinding? = null
-    // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
+
+    // --- ViewModel (The Brain) ---
+    // We use activityViewModels() to share data with NetworksFragment
+    private val viewModel: FSViewModel by activityViewModels()
 
     // --- State Variables ---
     private var isSystemStatusExpanded = false
-    private var isScanning = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -39,149 +45,125 @@ class DashboardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 1. Initial Data & Customization Setup
-        setupMetricCards()
-
-        // 2. Scan Button Logic
+        // 1. Initial UI Setup (Static visuals)
+        setupStaticMetricCards()
+        setupTopNavigation()
         setupScanButton()
-
-        // 3. System Status
         setupSystemStatusCard()
 
-        // 4. Recent Activity RecyclerView
+        // 2. Connect to Database (Live Updates)
+        setupObservers()
+
+        // 3. Setup Recent Activity
         setupRecentActivity()
 
-        // 5. Initial Top Nav State
-        setupTopNavigation()
-
+        // Set default tab state
         updateTabStyles(isNetworks = false)
     }
 
-    // --- Metric Card Setup (Data, Icons, Hue) ---
-    private fun setupMetricCards() {
+    // ============================================
+    // 1. DATA OBSERVERS (The "Live" Part)
+    // ============================================
+    private fun setupObservers() {
 
-        fun bindCardViews(includeBinding: CardMetricBinding, iconRes: Int, accentColorRes: Int, value: String, title: String, subtext: String, hueDrawableRes: Int) {
+        // A. Watch for Networks -> Update "Networks" Card
+        viewModel.networks.observe(viewLifecycleOwner) { networks ->
+            binding.cardNetworks.metricValueText.text = networks.size.toString()
+            binding.cardNetworks.metricSubtext.text = "Last scan: Just now"
+        }
+
+        // B. Watch for Threats -> Update "Threats" Card & System Status
+        viewModel.threats.observe(viewLifecycleOwner) { threats ->
+            // Update the small card
+            binding.cardThreats.metricValueText.text = threats.size.toString()
+
+            // Update the Big Status Card (Red vs Green)
+            updateSecurityStatus(threats)
+        }
+    }
+
+    // ============================================
+    // 2. UI LOGIC & ANIMATIONS
+    // ============================================
+
+    private fun setupStaticMetricCards() {
+        fun bindCardStyle(includeBinding: CardMetricBinding, iconRes: Int, accentColorRes: Int, title: String, hueDrawableRes: Int) {
             includeBinding.apply {
                 metricIcon.setImageResource(iconRes)
                 metricIcon.setColorFilter(ContextCompat.getColor(requireContext(), accentColorRes))
-                metricValueText.text = value
                 metricTitleText.text = title
-                metricSubtext.text = subtext
+                metricValueText.text = "-" // Placeholder until data loads
                 cardContentContainer.setBackgroundResource(hueDrawableRes)
             }
         }
 
-        // 1. Networks Card
-        bindCardViews(
-            binding.cardNetworks,
-            R.drawable.ic_wifi,
-            R.color.networks_accent,
-            "23",
-            getString(R.string.networks),
-            getString(R.string.last_scan),
-            R.drawable.bg_card_networks_hue
-        )
+        bindCardStyle(binding.cardNetworks, R.drawable.ic_wifi, R.color.networks_accent, getString(R.string.networks), R.drawable.bg_card_networks_hue)
+        bindCardStyle(binding.cardThreats, R.drawable.ic_shield, R.color.threats_accent, getString(R.string.threats), R.drawable.bg_card_threats_hue)
+        bindCardStyle(binding.cardConnections, R.drawable.ic_activity, R.color.connections_accent, getString(R.string.connections), R.drawable.bg_card_connections_hue)
 
-        // 2. Threats Card
-        bindCardViews(
-            binding.cardThreats,
-            R.drawable.ic_shield, //
-            R.color.threats_accent,
-            "2",
-            getString(R.string.threats),
-            getString(R.string.active_alerts),
-            R.drawable.bg_card_threats_hue
-        )
-
-        // 3. Connections Card
-        bindCardViews(
-            binding.cardConnections,
-            R.drawable.ic_activity, //
-            R.color.connections_accent,
-            "1",
-            getString(R.string.connections),
-            getString(R.string.currently_active),
-            R.drawable.bg_card_connections_hue
-        )
-
-        // 4. Uptime Card
-        bindCardViews(
-            binding.cardUptime,
-            R.drawable.ic_clock,
-            R.color.uptime_accent,
-            getString(R.string.uptime_value),
-            getString(R.string.uptime),
-            getString(R.string.protection_active),
-            R.drawable.bg_card_uptime_hue
-        )
+        bindCardStyle(binding.cardUptime, R.drawable.ic_clock, R.color.uptime_accent, getString(R.string.uptime), R.drawable.bg_card_uptime_hue)
+        binding.cardUptime.metricValueText.text = "98%"
+        binding.cardUptime.metricSubtext.text = getString(R.string.protection_active)
     }
 
-    // --- Scan Button Logic ---
     private fun setupScanButton() {
         binding.scanButton.setOnClickListener {
+            // Animation
             it.animate().scaleX(0.95f).scaleY(0.95f).setDuration(100).withEndAction {
                 it.animate().scaleX(1f).scaleY(1f).setDuration(100).start()
             }.start()
 
-            startScan()
+            // Trigger Real Scan
+            startRealScan()
         }
     }
 
-    private fun startScan() {
-        isScanning = true
+    private fun startRealScan() {
+        // 1. Visual Feedback
         binding.scanButton.text = "Scanning..."
         binding.scanButton.isEnabled = false
         binding.scanButton.setIconTintResource(android.R.color.transparent)
         binding.scanProgress.visibility = View.VISIBLE
+
+        // 2. Call the Service via ViewModel
+        viewModel.startScanningService()
+        Toast.makeText(context, "Background Scan Started", Toast.LENGTH_SHORT).show()
+
+        // 3. Reset Button Visuals (Service keeps running, but button resets for user)
         binding.scanButton.postDelayed({
-            stopScan()
+            stopScanVisuals()
         }, 3000)
     }
 
-    private fun stopScan() {
-        isScanning = false
+    private fun stopScanVisuals() {
+        if (_binding == null) return
         binding.scanButton.isEnabled = true
         binding.scanButton.setIconTintResource(android.R.color.white)
         binding.scanButton.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_scan)
         binding.scanButton.text = "Start Security Scan"
         binding.scanProgress.visibility = View.GONE
-
-        // For testing/UI updates:
-        val results = listOf("SECURE", "CAUTION", "THREAT")
-        updateSecurityStatus(results.random())
     }
 
-
-    private fun updateSecurityStatus(state: String) {
+    private fun updateSecurityStatus(threats: List<ThreatAlert>) {
         binding.statusCardContainer.visibility = View.VISIBLE
 
-        when (state) {
-            "SECURE" -> {
-                binding.apply {
-                    statusCardBg.setBackgroundResource(R.drawable.bg_card_networks_hue)
-                    statusIcon.setImageResource(R.drawable.ic_shield)
-                    statusIcon.setColorFilter("#4CAF50".toColorInt())
-                    threatLevelText.text = "SECURE"
-                    threatDescriptionText.text = "No threats detected. Your connection is safe."
-                }
+        if (threats.isNotEmpty()) {
+            // --- THREAT DETECTED (RED) ---
+            binding.apply {
+                statusCardBg.setBackgroundResource(R.drawable.bg_card_threats_hue)
+                statusIcon.setImageResource(R.drawable.ic_warning)
+                statusIcon.setColorFilter(Color.parseColor("#F44336")) // Red
+                threatLevelText.text = "THREAT DETECTED"
+                threatDescriptionText.text = "${threats.size} Evil Twin attack(s) detected! Disconnect immediately."
             }
-            "CAUTION" -> {
-                binding.apply {
-                    statusCardBg.setBackgroundResource(R.drawable.bg_card_connections_hue)
-                    statusIcon.setImageResource(R.drawable.ic_caution)
-                    statusIcon.setColorFilter("#FF9800".toColorInt())
-                    threatLevelText.text = "CAUTION"
-                    threatDescriptionText.text = "Suspicious network activity. Monitor closely."
-                }
-            }
-            "THREAT" -> {
-                binding.apply {
-                    statusCardBg.setBackgroundResource(R.drawable.bg_card_threats_hue)
-                    statusIcon.setImageResource(R.drawable.ic_warning)
-                    statusIcon.setColorFilter("#F44336".toColorInt())
-                    threatLevelText.text = "THREAT DETECTED"
-                    threatDescriptionText.text = "Evil Twin attack detected! Disconnect immediately."
-                }
+        } else {
+            // --- SECURE (GREEN) ---
+            binding.apply {
+                statusCardBg.setBackgroundResource(R.drawable.bg_card_networks_hue)
+                statusIcon.setImageResource(R.drawable.ic_shield)
+                statusIcon.setColorFilter(Color.parseColor("#4CAF50")) // Green
+                threatLevelText.text = "SYSTEM SECURE"
+                threatDescriptionText.text = "No threats detected. Your connection is safe."
             }
         }
     }
@@ -195,53 +177,18 @@ class DashboardFragment : Fragment() {
 
     private fun toggleSystemStatusDetails() {
         isSystemStatusExpanded = !isSystemStatusExpanded
-
-
         binding.systemStatusDetails.visibility = if (isSystemStatusExpanded) View.VISIBLE else View.GONE
 
         val rotation = if (isSystemStatusExpanded) 180f else 0f
-        binding.systemStatusArrow.animate()
-            .rotation(rotation)
-            .setDuration(300)
-            .start()
+        binding.systemStatusArrow.animate().rotation(rotation).setDuration(300).start()
     }
 
-    // --- Recent Activity Setup ---
+    // --- Recent Activity ---
     private fun setupRecentActivity() {
-        // Updated to use the new ActivityItem constructor with Enums and Long timestamps
         val now = System.currentTimeMillis()
-        val oneMinute = 60 * 1000
-        val oneHour = 60 * oneMinute
-
         val activityList = listOf(
-            ActivityItem(
-                id = UUID.randomUUID().toString(),
-                title = "Evil Twin Detected",
-                description = "Suspicious network \"SM_Mall_WIFI\" found",
-                timestamp = now - (2 * oneMinute), // 2 mins ago
-                type = ActivityType.THREAT_DETECTED
-            ),
-            ActivityItem(
-                id = UUID.randomUUID().toString(),
-                title = "Network Scan Completed",
-                description = "23 networks analyzed, 2 threats found",
-                timestamp = now - (5 * oneMinute), // 5 mins ago
-                type = ActivityType.SCAN_COMPLETED
-            ),
-            ActivityItem(
-                id = UUID.randomUUID().toString(),
-                title = "Connected to WiFi",
-                description = "Successfully connected to secure network",
-                timestamp = now - (15 * oneMinute), // 15 mins ago
-                type = ActivityType.WIFI_CONNECTED
-            ),
-            ActivityItem(
-                id = UUID.randomUUID().toString(),
-                title = "Protection Enabled",
-                description = "Real-time monitoring activated",
-                timestamp = now - oneHour, // 1 hr ago
-                type = ActivityType.PROTECTION_ENABLED
-            )
+            ActivityItem(UUID.randomUUID().toString(), "Protection Enabled", "Real-time monitoring activated", now, ActivityType.PROTECTION_ENABLED),
+            ActivityItem(UUID.randomUUID().toString(), "System Ready", "Database initialized", now, ActivityType.SYSTEM_STATUS_CHANGE)
         )
 
         binding.recentActivityRecycler.apply {
@@ -251,11 +198,13 @@ class DashboardFragment : Fragment() {
         }
     }
 
+    // --- Navigation Logic ---
     private fun setupTopNavigation() {
         binding.btnNetworksTab.setOnClickListener {
             binding.overviewScrollView.visibility = View.GONE
             binding.networksFragmentContainer.visibility = View.VISIBLE
 
+            // Load Networks Fragment
             childFragmentManager.beginTransaction()
                 .replace(R.id.networks_fragment_container, NetworksFragment())
                 .commit()
@@ -266,7 +215,6 @@ class DashboardFragment : Fragment() {
         binding.btnOverview.setOnClickListener {
             binding.networksFragmentContainer.visibility = View.GONE
             binding.overviewScrollView.visibility = View.VISIBLE
-
             updateTabStyles(isNetworks = false)
         }
     }
@@ -275,21 +223,18 @@ class DashboardFragment : Fragment() {
         if (isNetworks) {
             binding.btnNetworksTab.setBackgroundResource(R.drawable.bg_tab_selected)
             binding.btnNetworksTab.setTextColor(Color.BLACK)
-
             binding.btnOverview.setBackgroundResource(android.R.color.transparent)
-            binding.btnOverview.setTextColor("#666666".toColorInt())
+            binding.btnOverview.setTextColor(Color.parseColor("#666666"))
         } else {
             binding.btnOverview.setBackgroundResource(R.drawable.bg_tab_selected)
             binding.btnOverview.setTextColor(Color.BLACK)
-
             binding.btnNetworksTab.setBackgroundResource(android.R.color.transparent)
-            binding.btnNetworksTab.setTextColor("#666666".toColorInt())
+            binding.btnNetworksTab.setTextColor(Color.parseColor("#666666"))
         }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        // Essential to prevent memory leaks in Fragments using View Binding
         _binding = null
     }
 }
