@@ -1,31 +1,49 @@
 package com.example.forenscan.data.repository
 
 import android.content.Context
-import com.example.forenscan.data.database.*
+import com.example.forenscan.data.database.ForensicDatabase
+import com.example.forenscan.data.database.NetworkDataEntity
+import com.example.forenscan.data.database.ThreatAlertEntity
+import com.example.forenscan.data.database.ActivityEventEntity
+import com.example.forenscan.data.database.SystemStatsEntity
 import com.example.forenscan.data.models.*
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
+import java.util.UUID
 
 /**
- * ForensicRepository - Central data management
- *
- * Handles all database operations and data export
- * Implements NFDLC Preservation and Presentation phases
+ * ForensicRepository
+ * * The Single Source of Truth for the application.
+ * - Saves network snapshots from the Scanner Service.
+ * - Provides LiveData to the ViewModel/Dashboard.
+ * - Logs forensic timeline events.
+ * - Tracks system statistics (Total Scans, Threats Found).
  */
 class ForensicRepository(context: Context) {
 
+    // --- Database Initialization ---
     private val database = ForensicDatabase.getDatabase(context)
+    private val networkDataDao = database.networkDataDao()
     private val threatAlertDao = database.threatAlertDao()
     private val activityEventDao = database.activityEventDao()
-    private val networkDataDao = database.networkDataDao()
     private val systemStatsDao = database.systemStatsDao()
 
-    // ============================================
-    // THREAT ALERTS
-    // ============================================
+    // =================================================================
+    // 1. GET DATA (Used by ViewModel to update UI)
+    // =================================================================
 
     /**
-     * Get all threats as Flow (automatically updates UI)
+     * Returns a live stream of all scanned networks.
+     */
+    fun getAllNetworks(): Flow<List<WifiNetwork>> {
+        return networkDataDao.getAllNetworks().map { entities ->
+            entities.map { it.toDomain() }
+        }
+    }
+
+    /**
+     * Returns a live stream of all threats (Historical & Active).
      */
     fun getAllThreats(): Flow<List<ThreatAlert>> {
         return threatAlertDao.getAllAlerts().map { entities ->
@@ -34,7 +52,7 @@ class ForensicRepository(context: Context) {
     }
 
     /**
-     * Get active (unresolved) threats
+     * Returns only active threats for the Dashboard Status Card.
      */
     fun getActiveThreats(): Flow<List<ThreatAlert>> {
         return threatAlertDao.getActiveAlerts().map { entities ->
@@ -43,234 +61,179 @@ class ForensicRepository(context: Context) {
     }
 
     /**
-     * Get resolved threats
+     * Returns the System Stats (Total Scans, etc.)
      */
-    fun getResolvedThreats(): Flow<List<ThreatAlert>> {
-        return threatAlertDao.getResolvedAlerts().map { entities ->
-            entities.map { it.toDomain() }
-        }
+    fun getSystemStats(): Flow<SystemStats?> {
+        return systemStatsDao.getStats().map { it?.toDomain() }
     }
 
     /**
-     * Save a threat alert
+     * Returns the Timeline Events (Forensic History)
      */
-    suspend fun saveThreatAlert(alert: ThreatAlert) {
-        threatAlertDao.insertAlert(alert.toEntity())
-    }
-
-    /**
-     * Mark threat as resolved
-     */
-    suspend fun resolveAlert(alertId: String) {
-        threatAlertDao.markAsResolved(alertId)
-    }
-
-    /**
-     * Delete all alerts
-     */
-    suspend fun deleteAllAlerts() {
-        threatAlertDao.deleteAllAlerts()
-    }
-
-    // ============================================
-    // ACTIVITY EVENTS (Timeline)
-    // ============================================
-
-    /**
-     * Get recent activity events
-     * NOTE: Uses ActivityItem to match your Adapter
-     */
-    fun getRecentActivity(limit: Int = 20): Flow<List<ActivityItem>> {
-        return activityEventDao.getRecentEvents(limit).map { entities ->
-            entities.map { it.toDomain() }
-        }
-    }
-
-    /**
-     * Get all activity events
-     */
-    fun getAllActivity(): Flow<List<ActivityItem>> {
+    fun getRecentActivity(): Flow<List<ActivityItem>> {
         return activityEventDao.getAllEvents().map { entities ->
             entities.map { it.toDomain() }
         }
     }
 
+    // =================================================================
+    // 2. SAVE DATA (Used by FSWifiScanner Service)
+    // =================================================================
+
     /**
-     * Save activity event
+     * Saves a snapshot of a single network scan result.
+     * Also updates the total scan counter.
      */
-    suspend fun saveActivityEvent(event: ActivityItem) {
+    suspend fun saveNetworkSnapshot(network: WifiNetwork) {
+        // 1. Save the Network
+        val entity = network.toEntity()
+        networkDataDao.insertNetwork(entity)
+
+        // 2. Ensure Stats Row Exists
+        val stats = systemStatsDao.getStats().firstOrNull()
+        if (stats == null) {
+            systemStatsDao.insertStats(SystemStatsEntity())
+        }
+
+        // 3. Update Counters
+        systemStatsDao.incrementTotalScans()
+        systemStatsDao.updateLastScanTime(System.currentTimeMillis())
+
+        // 4. If it's an Evil Twin, log it to the Timeline automatically
+        if (network.classification == NetworkClassification.EVIL_TWIN) {
+            val event = ActivityItem(
+                id = UUID.randomUUID().toString(),
+                title = "Evil Twin Identified",
+                description = "SSID: ${network.ssid} | Signal: ${network.signalStrength}dBm",
+                timestamp = System.currentTimeMillis(),
+                type = ActivityType.THREAT_DETECTED
+            )
+            activityEventDao.insertEvent(event.toEntity())
+        }
+    }
+
+    /**
+     * Saves a high-priority threat alert and logs it to the timeline.
+     */
+    suspend fun insertThreat(alert: ThreatAlert) {
+        // 1. Save Alert
+        threatAlertDao.insertAlert(alert.toEntity())
+
+        // 2. Update Stats
+        systemStatsDao.incrementThreatsDetected()
+
+        // 3. Log to Activity Timeline
+        val event = ActivityItem(
+            id = UUID.randomUUID().toString(),
+            title = "Threat Detected",
+            description = "${alert.severity} Alert: ${alert.title}",
+            timestamp = System.currentTimeMillis(),
+            type = ActivityType.THREAT_DETECTED
+        )
         activityEventDao.insertEvent(event.toEntity())
     }
 
     /**
-     * Delete all activity
+     * Marks a threat as "Resolved" (e.g., user clicked "Ignore").
      */
-    suspend fun deleteAllActivity() {
-        activityEventDao.deleteAllEvents()
+    suspend fun markThreatResolved(alertId: String) {
+        threatAlertDao.markAsResolved(alertId)
     }
 
-    /**
-     * Delete old events (older than 30 days)
-     */
-    suspend fun cleanOldActivity() {
-        val thirtyDaysAgo = System.currentTimeMillis() - (30L * 24 * 60 * 60 * 1000)
-        activityEventDao.deleteOldEvents(thirtyDaysAgo)
+    // =================================================================
+    // 3. MAPPERS (Convert Database Objects <-> App Objects)
+    // =================================================================
+
+    // --- WifiNetwork Mappings ---
+    private fun WifiNetwork.toEntity() = NetworkDataEntity(
+        ssid = ssid,
+        bssid = macAddress,
+        signalStrength = signalStrength,
+        frequency = parseFrequency(frequency),
+        channel = frequencyToChannel(parseFrequency(frequency)), // Calculate Channel
+        securityType = encryption,
+        timestamp = System.currentTimeMillis(),
+        isConnected = isConnected,
+        isDuplicate = classification == NetworkClassification.EVIL_TWIN
+    )
+
+    private fun NetworkDataEntity.toDomain() = WifiNetwork(
+        ssid = ssid,
+        macAddress = bssid,
+        encryption = securityType,
+        frequency = "${frequency}MHz",
+        signalStrength = signalStrength,
+        classification = if (isDuplicate) NetworkClassification.EVIL_TWIN else NetworkClassification.SAFE,
+        isConnected = isConnected,
+        timestamp = timestamp.toString()
+    )
+
+    // --- ThreatAlert Mappings ---
+    private fun ThreatAlert.toEntity() = ThreatAlertEntity(
+        id = id,
+        title = title,
+        description = description,
+        severity = severity.name, // Enum to String
+        networkName = networkName,
+        macAddress = macAddress,
+        timestamp = timestamp,
+        isResolved = isResolved,
+        recommendedAction = recommendedAction
+    )
+
+    private fun ThreatAlertEntity.toDomain() = ThreatAlert(
+        id = id,
+        title = title,
+        description = description,
+        severity = ThreatSeverity.valueOf(severity), // String to Enum
+        networkName = networkName,
+        macAddress = macAddress,
+        timestamp = timestamp,
+        isResolved = isResolved,
+        recommendedAction = recommendedAction
+    )
+
+    // --- ActivityItem Mappings ---
+    private fun ActivityItem.toEntity() = ActivityEventEntity(
+        id = id,
+        title = title,
+        description = description,
+        timestamp = timestamp,
+        type = type.name
+    )
+
+    private fun ActivityEventEntity.toDomain() = ActivityItem(
+        id = id,
+        title = title,
+        description = description,
+        timestamp = timestamp,
+        type = ActivityType.valueOf(type)
+    )
+
+    // --- SystemStats Mappings ---
+    private fun SystemStatsEntity.toDomain() = SystemStats(
+        networksScanned = networksScanned,
+        threatsDetected = threatsDetected,
+        lastScanTime = lastScanTime,
+        totalScans = totalScans
+    )
+
+    // =================================================================
+    // 4. UTILITIES (Helpers)
+    // =================================================================
+
+    private fun parseFrequency(freqString: String): Int {
+        // Removes "MHz" and converts to Int (e.g., "2412MHz" -> 2412)
+        return freqString.replace("MHz", "").trim().toIntOrNull() ?: 2400
     }
 
-    // ============================================
-    // NETWORK DATA (Scan History)
-    // ============================================
-
-    /**
-     * Get recent network scans
-     * NOTE: Uses WifiNetwork to match your Adapter
-     */
-    fun getRecentNetworks(limit: Int = 100): Flow<List<WifiNetwork>> {
-        return networkDataDao.getRecentNetworks(limit).map { entities ->
-            entities.map { it.toDomain() }
+    private fun frequencyToChannel(freq: Int): Int {
+        return when {
+            freq == 2484 -> 14
+            freq < 2484 -> (freq - 2407) / 5
+            freq in 4910..4980 -> (freq - 4000) / 5
+            freq < 5935 -> (freq - 5000) / 5
+            else -> 0 // Unknown
         }
-    }
-
-    /**
-     * Save network scan results
-     */
-    suspend fun saveNetworkScan(networks: List<WifiNetwork>) {
-        val entities = networks.map { it.toEntity() }
-        networkDataDao.insertNetworks(entities)
-    }
-
-    /**
-     * Delete all network history
-     */
-    suspend fun deleteAllNetworks() {
-        networkDataDao.deleteAllNetworks()
-    }
-
-    // ============================================
-    // SYSTEM STATS
-    // ============================================
-
-    /**
-     * Get system statistics
-     */
-    fun getSystemStats(): Flow<SystemStats> {
-        return systemStatsDao.getStats().map { entity ->
-            entity?.toDomain() ?: SystemStats()
-        }
-    }
-
-    /**
-     * Update system statistics
-     */
-    suspend fun updateStats(stats: SystemStats) {
-        systemStatsDao.insertStats(stats.toEntity())
-    }
-
-    /**
-     * Increment total scans counter
-     */
-    suspend fun incrementScanCount() {
-        systemStatsDao.incrementTotalScans()
-    }
-
-    // ============================================
-    // BULK OPERATIONS
-    // ============================================
-
-    /**
-     * Clear all forensic data
-     */
-    suspend fun clearAllData() {
-        threatAlertDao.deleteAllAlerts()
-        activityEventDao.deleteAllEvents()
-        networkDataDao.deleteAllNetworks()
-        // Don't delete stats, just reset them
-        systemStatsDao.insertStats(SystemStats().toEntity())
     }
 }
-
-// ============================================
-// MAPPER EXTENSIONS (COPY THESE LINES!)
-// ============================================
-
-// 1. ThreatAlert Mappings
-fun ThreatAlert.toEntity() = ThreatAlertEntity(
-    id = id,
-    title = title,
-    description = description,
-    severity = severity.name,
-    networkName = networkName,
-    timestamp = timestamp,
-    isResolved = isResolved,
-    recommendedAction = recommendedAction
-)
-
-fun ThreatAlertEntity.toDomain() = ThreatAlert(
-    id = id,
-    title = title,
-    description = description,
-    severity = ThreatSeverity.valueOf(severity),
-    networkName = networkName,
-    timestamp = timestamp,
-    isResolved = isResolved,
-    recommendedAction = recommendedAction
-)
-
-// 2. ActivityItem Mappings
-fun ActivityItem.toEntity() = ActivityEventEntity(
-    id = id,
-    title = title,
-    description = description,
-    timestamp = timestamp,
-    type = type.name
-)
-
-fun ActivityEventEntity.toDomain() = ActivityItem(
-    id = id,
-    title = title,
-    description = description,
-    timestamp = timestamp,
-    type = ActivityType.valueOf(type)
-)
-
-// 3. WifiNetwork Mappings
-fun WifiNetwork.toEntity() = NetworkDataEntity(
-    ssid = ssid,
-    bssid = macAddress,
-    signalStrength = signalStrength,
-    channel = 0,
-    frequency = if (frequency.contains("5")) 5000 else 2400,
-    securityType = encryption,
-    timestamp = System.currentTimeMillis(),
-    isConnected = isConnected,
-    isDuplicate = classification == NetworkClassification.EVIL_TWIN
-)
-
-fun NetworkDataEntity.toDomain() = WifiNetwork(
-    ssid = ssid,
-    macAddress = bssid,
-    encryption = securityType,
-    frequency = "${frequency}MHz",
-    signalStrength = signalStrength,
-    classification = when {
-        isDuplicate -> NetworkClassification.EVIL_TWIN
-        else -> NetworkClassification.SAFE
-    },
-    isConnected = isConnected
-)
-
-// 4. SystemStats Mappings
-fun SystemStats.toEntity() = SystemStatsEntity(
-    id = 1,
-    networksScanned = networksScanned,
-    threatsDetected = threatsDetected,
-    lastScanTime = lastScanTime,
-    totalScans = totalScans
-)
-
-fun SystemStatsEntity.toDomain() = SystemStats(
-    networksScanned = networksScanned,
-    threatsDetected = threatsDetected,
-    lastScanTime = lastScanTime,
-    totalScans = totalScans
-)

@@ -2,23 +2,23 @@ package com.example.forenscan.data.database
 
 import android.content.Context
 import androidx.room.*
-import com.example.forenscan.data.models.*
+import com.example.forenscan.data.models.ThreatSeverity
 import kotlinx.coroutines.flow.Flow
 
-/**
- * Room Database for Forensic Data Storage
- * * This database stores all forensic evidence:
- * - Threat alerts detected
- * - Activity timeline events
- * - Network scan history
- * - System statistics
- * * Follows NFDLC Preservation Phase
- */
+// --- TYPE CONVERTERS ---
+class Converters {
+    @TypeConverter
+    fun fromSeverity(value: ThreatSeverity) = value.name
+    @TypeConverter
+    fun toSeverity(value: String) = ThreatSeverity.valueOf(value)
+}
+
+// --- DATABASE DEFINITION ---
 @Database(
     entities = [
+        NetworkDataEntity::class,
         ThreatAlertEntity::class,
         ActivityEventEntity::class,
-        NetworkDataEntity::class,
         SystemStatsEntity::class
     ],
     version = 1,
@@ -27,9 +27,9 @@ import kotlinx.coroutines.flow.Flow
 @TypeConverters(Converters::class)
 abstract class ForensicDatabase : RoomDatabase() {
 
+    abstract fun networkDataDao(): NetworkDataDao
     abstract fun threatAlertDao(): ThreatAlertDao
     abstract fun activityEventDao(): ActivityEventDao
-    abstract fun networkDataDao(): NetworkDataDao
     abstract fun systemStatsDao(): SystemStatsDao
 
     companion object {
@@ -42,9 +42,7 @@ abstract class ForensicDatabase : RoomDatabase() {
                     context.applicationContext,
                     ForensicDatabase::class.java,
                     "forensic_database"
-                )
-                    .fallbackToDestructiveMigration()
-                    .build()
+                ).fallbackToDestructiveMigration().build()
                 INSTANCE = instance
                 instance
             }
@@ -52,202 +50,66 @@ abstract class ForensicDatabase : RoomDatabase() {
     }
 }
 
-// ============================================
-// DATABASE ENTITIES (Table Definitions)
-// ============================================
+// --- DAOs (DATA ACCESS OBJECTS) ---
 
-/**
- * ThreatAlert table - stores detected threats
- */
-@Entity(tableName = "threat_alerts")
-data class ThreatAlertEntity(
-    @PrimaryKey val id: String,
-    val title: String,
-    val description: String,
-    val severity: String,              // Store as String: "LOW", "MEDIUM", "HIGH", "CRITICAL"
-    val networkName: String,
-    val timestamp: Long,
-    val isResolved: Boolean,
-    val recommendedAction: String
-)
+@Dao
+interface NetworkDataDao {
+    @Query("SELECT * FROM network_data ORDER BY timestamp DESC")
+    fun getAllNetworks(): Flow<List<NetworkDataEntity>>
 
-/**
- * ActivityEvent table - stores timeline events
- */
-@Entity(tableName = "activity_events")
-data class ActivityEventEntity(
-    @PrimaryKey val id: String,
-    val title: String,
-    val description: String,
-    val timestamp: Long,
-    val type: String                   // Store as String: "SCAN_COMPLETED", etc.
-)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertNetwork(network: NetworkDataEntity)
 
-/**
- * NetworkData table - stores scan history
- */
-@Entity(tableName = "network_data")
-data class NetworkDataEntity(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
-    val ssid: String,
-    val bssid: String,
-    val signalStrength: Int,
-    val channel: Int,
-    val frequency: Int,
-    val securityType: String,
-    val timestamp: Long,
-    val isConnected: Boolean,
-    val isDuplicate: Boolean
-)
+    // Used to clean up old data but keep evidence
+    @Query("DELETE FROM network_data WHERE isDuplicate = 0 AND timestamp < :cutoffTime")
+    suspend fun deleteOldSafeNetworks(cutoffTime: Long)
+}
 
-/**
- * SystemStats table - stores app statistics
- */
-@Entity(tableName = "system_stats")
-data class SystemStatsEntity(
-    @PrimaryKey val id: Int = 1,       // Always use ID = 1 (single row)
-    val networksScanned: Int,
-    val threatsDetected: Int,
-    val lastScanTime: Long,
-    val totalScans: Int
-)
-
-// ============================================
-// DATA ACCESS OBJECTS (DAOs)
-// ============================================
-
-/**
- * DAO for ThreatAlerts
- */
 @Dao
 interface ThreatAlertDao {
-
     @Query("SELECT * FROM threat_alerts ORDER BY timestamp DESC")
     fun getAllAlerts(): Flow<List<ThreatAlertEntity>>
 
     @Query("SELECT * FROM threat_alerts WHERE isResolved = 0 ORDER BY timestamp DESC")
     fun getActiveAlerts(): Flow<List<ThreatAlertEntity>>
 
-    @Query("SELECT * FROM threat_alerts WHERE isResolved = 1 ORDER BY timestamp DESC")
-    fun getResolvedAlerts(): Flow<List<ThreatAlertEntity>>
-
-    @Query("SELECT * FROM threat_alerts WHERE id = :alertId")
-    suspend fun getAlertById(alertId: String): ThreatAlertEntity?
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAlert(alert: ThreatAlertEntity)
 
-    @Update
-    suspend fun updateAlert(alert: ThreatAlertEntity)
-
     @Query("UPDATE threat_alerts SET isResolved = 1 WHERE id = :alertId")
     suspend fun markAsResolved(alertId: String)
-
-    @Query("DELETE FROM threat_alerts")
-    suspend fun deleteAllAlerts()
-
-    @Query("SELECT COUNT(*) FROM threat_alerts WHERE isResolved = 0")
-    suspend fun getActiveAlertCount(): Int
 }
 
-/**
- * DAO for ActivityEvents
- */
 @Dao
 interface ActivityEventDao {
-
-    @Query("SELECT * FROM activity_events ORDER BY timestamp DESC LIMIT :limit")
-    fun getRecentEvents(limit: Int = 20): Flow<List<ActivityEventEntity>>
-
-    @Query("SELECT * FROM activity_events ORDER BY timestamp DESC")
+    @Query("SELECT * FROM activity_events ORDER BY timestamp DESC LIMIT 50")
     fun getAllEvents(): Flow<List<ActivityEventEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertEvent(event: ActivityEventEntity)
-
-    @Query("DELETE FROM activity_events")
-    suspend fun deleteAllEvents()
-
-    @Query("DELETE FROM activity_events WHERE timestamp < :cutoffTime")
-    suspend fun deleteOldEvents(cutoffTime: Long)
 }
 
-/**
- * DAO for NetworkData
- */
-@Dao
-interface NetworkDataDao {
-
-    @Query("SELECT * FROM network_data ORDER BY timestamp DESC LIMIT :limit")
-    fun getRecentNetworks(limit: Int = 100): Flow<List<NetworkDataEntity>>
-
-    @Query("SELECT * FROM network_data WHERE ssid = :ssid ORDER BY timestamp DESC")
-    fun getNetworksBySSID(ssid: String): Flow<List<NetworkDataEntity>>
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertNetwork(network: NetworkDataEntity)
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertNetworks(networks: List<NetworkDataEntity>)
-
-    @Query("DELETE FROM network_data")
-    suspend fun deleteAllNetworks()
-
-    @Query("DELETE FROM network_data WHERE timestamp < :cutoffTime")
-    suspend fun deleteOldNetworks(cutoffTime: Long)
-}
-
-/**
- * DAO for SystemStats
- */
 @Dao
 interface SystemStatsDao {
-
     @Query("SELECT * FROM system_stats WHERE id = 1")
     fun getStats(): Flow<SystemStatsEntity?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertStats(stats: SystemStatsEntity)
 
-    @Query("UPDATE system_stats SET networksScanned = :count WHERE id = 1")
-    suspend fun updateNetworksScanned(count: Int)
+    @Query("UPDATE system_stats SET totalScans = totalScans + 1, lastScanTime = :time WHERE id = 1")
+    suspend fun updateScanStats(time: Long)
 
     @Query("UPDATE system_stats SET threatsDetected = :count WHERE id = 1")
-    suspend fun updateThreatsDetected(count: Int)
+    suspend fun updateThreatCount(count: Int)
+
+    // Simple helper to increment total scans
+    @Query("UPDATE system_stats SET totalScans = totalScans + 1")
+    suspend fun incrementTotalScans()
 
     @Query("UPDATE system_stats SET lastScanTime = :time WHERE id = 1")
     suspend fun updateLastScanTime(time: Long)
 
-    @Query("UPDATE system_stats SET totalScans = totalScans + 1 WHERE id = 1")
-    suspend fun incrementTotalScans()
-}
-
-// ============================================
-// TYPE CONVERTERS
-// ============================================
-
-/**
- * Converters for complex data types
- */
-class Converters {
-
-    @TypeConverter
-    fun fromThreatSeverity(severity: ThreatSeverity): String {
-        return severity.name
-    }
-
-    @TypeConverter
-    fun toThreatSeverity(severity: String): ThreatSeverity {
-        return ThreatSeverity.valueOf(severity)
-    }
-
-    @TypeConverter
-    fun fromActivityType(type: ActivityType): String {
-        return type.name
-    }
-
-    @TypeConverter
-    fun toActivityType(type: String): ActivityType {
-        return ActivityType.valueOf(type)
-    }
+    @Query("UPDATE system_stats SET threatsDetected = threatsDetected + 1 WHERE id = 1")
+    suspend fun incrementThreatsDetected()
 }

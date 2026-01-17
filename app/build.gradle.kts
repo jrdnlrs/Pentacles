@@ -48,7 +48,15 @@ android {
 }
 
 dependencies {
+    // ... other dependencies ...
 
+    // FIX FOR: activityViewModels
+    implementation("androidx.fragment:fragment-ktx:1.8.6")
+
+    // FIX FOR: asLiveData and viewModelScope
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.7")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.10.0")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
