@@ -10,8 +10,11 @@ import com.example.forenscan.data.models.NetworkClassification
 import com.example.forenscan.data.models.WifiNetwork
 import com.example.forenscan.databinding.ItemNetworkConnectionBinding
 
-class WifiNetworkAdapter(private val networks: List<WifiNetwork>) :
-    RecyclerView.Adapter<WifiNetworkAdapter.WifiViewHolder>() {
+// CHANGED: Added 'onItemClick' to the constructor so we can handle clicks
+class WifiNetworkAdapter(
+    private val networks: List<WifiNetwork>,
+    private val onItemClick: (WifiNetwork) -> Unit
+) : RecyclerView.Adapter<WifiNetworkAdapter.WifiViewHolder>() {
 
     class WifiViewHolder(val binding: ItemNetworkConnectionBinding) :
         RecyclerView.ViewHolder(binding.root)
@@ -47,6 +50,8 @@ class WifiNetworkAdapter(private val networks: List<WifiNetwork>) :
                     statusIconSmall.setImageResource(R.drawable.ic_check_circle)
                     statusIconSmall.setColorFilter(Color.parseColor("#4CAF50"))
                     wifiIcon.setColorFilter(Color.parseColor("#4CAF50"))
+
+                    // Hide alert cards for safe networks to keep UI clean
                     alertCard.visibility = View.GONE
                     recommendationCard.visibility = View.GONE
                 }
@@ -58,6 +63,7 @@ class WifiNetworkAdapter(private val networks: List<WifiNetwork>) :
                     statusIconSmall.setImageResource(R.drawable.ic_warning)
                     statusIconSmall.setColorFilter(Color.parseColor("#FF9800"))
                     wifiIcon.setColorFilter(Color.parseColor("#FF9800"))
+
                     alertCard.visibility = View.GONE
                     recommendationCard.visibility = View.GONE
                 }
@@ -69,15 +75,21 @@ class WifiNetworkAdapter(private val networks: List<WifiNetwork>) :
                     statusIconSmall.setImageResource(R.drawable.ic_cancel)
                     statusIconSmall.setColorFilter(Color.parseColor("#F44336"))
                     wifiIcon.setColorFilter(Color.parseColor("#F44336"))
+
                     alertCard.visibility = View.VISIBLE
                     recommendationCard.visibility = View.VISIBLE
-                    recommendationText.text = "Recommendation: Do not connect to this network. Report to system administrator if this is a legitimate business network."
+                    recommendationText.text = "Recommendation: Do not connect. Report to admin."
                 }
             }
 
+            // CHANGED: Clicking the card now opens the Details Screen
             mainContent.setOnClickListener {
-                val isVisible = detailsSection.visibility == View.VISIBLE
-                detailsSection.visibility = if (isVisible) View.GONE else View.VISIBLE
+                onItemClick(network)
+            }
+
+            // Optional: If you want the whole card to be clickable, not just mainContent:
+            root.setOnClickListener {
+                onItemClick(network)
             }
         }
     }
