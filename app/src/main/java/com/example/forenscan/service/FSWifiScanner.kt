@@ -128,26 +128,27 @@ class FSWifiScanner : Service() {
                                 val isConnected = (scanResult.BSSID == currentBSSID)
 
                                 // 2. Hybrid Detection (ML + Rules)
-                                val isEvilTwin = threatDetector.analyzeNetwork(
-                                    ssid = scanResult.SSID,
+                                // We get a Classification Enum back (SAFE, SUSPICIOUS, or EVIL_TWIN)
+                                val classification = threatDetector.analyzeNetwork(
+                                    ssid = scanResult.SSID ?: "Hidden",
                                     bssid = scanResult.BSSID,
                                     signalStrength = scanResult.level,
-                                    encryption = scanResult.capabilities
+                                    capabilities = scanResult.capabilities
                                 )
 
-                                // 3. Classify
-                                val classification = if (isEvilTwin) NetworkClassification.EVIL_TWIN else NetworkClassification.SAFE
+                                // 3. Determine if it's an Evil Twin based on the Enum
+                                val isEvilTwin = (classification == NetworkClassification.EVIL_TWIN)
 
                                 // 4. Create the Data Model
                                 val network = WifiNetwork(
-                                    ssid = scanResult.SSID,
+                                    ssid = scanResult.SSID ?: "Hidden",
                                     macAddress = scanResult.BSSID,
                                     encryption = scanResult.capabilities,
                                     frequency = "${scanResult.frequency}MHz",
                                     signalStrength = scanResult.level,
-                                    classification = classification,
+                                    classification = classification, // Pass the Enum directly here
                                     timestamp = System.currentTimeMillis().toString(),
-                                    isConnected = isConnected // Pass status to UI
+                                    isConnected = isConnected
                                 )
 
                                 // 5. Save to Database
