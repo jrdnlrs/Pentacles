@@ -73,4 +73,19 @@ class FSViewModel(application: Application) : AndroidViewModel(application) {
             timelineExportStatus.postValue(uri)
         }
     }
+    fun resolveThreat(threatId: String) {
+        viewModelScope.launch {
+            // Find the threat and mark it as resolved
+            val currentList = threats.value ?: return@launch
+            val threatToUpdate = currentList.find { it.id == threatId }
+
+            if (threatToUpdate != null) {
+                // Create a copy with isResolved = true
+                val updatedThreat = threatToUpdate.copy(isResolved = true)
+
+                // Update in Database (Insert with same ID = Overwrite)
+                repository.insertThreat(updatedThreat)
+            }
+        }
+    }
 }

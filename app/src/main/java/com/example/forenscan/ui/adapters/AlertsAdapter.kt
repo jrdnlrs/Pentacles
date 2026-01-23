@@ -8,36 +8,45 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.forenscan.R
+import com.google.android.material.button.MaterialButton
 
 // 1. Data Model
 data class AlertItem(
+    val id: String,          // Added ID to track specific threats
     val title: String,
     val description: String,
-    val type: String,     // e.g. "Evil Twin"
-    val severity: String, // "CRITICAL", "HIGH", "MEDIUM"
+    val type: String,
+    val severity: String,
     val ssid: String,
     val location: String,
     val timeAgo: String,
     val macAddress: String,
-    val recommendedAction: String
+    val recommendedAction: String,
+    val isResolved: Boolean  // Added to hide button if already fixed
 )
 
 // 2. Adapter Class
-class AlertsAdapter(private val alerts: List<AlertItem>) :
-    RecyclerView.Adapter<AlertsAdapter.AlertViewHolder>() {
+class AlertsAdapter(
+    private val alerts: List<AlertItem>,
+    private val onResolveClick: (String) -> Unit // Callback for the button
+) : RecyclerView.Adapter<AlertsAdapter.AlertViewHolder>() {
 
     class AlertViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        // IDs must match 'item_threat_alert.xml' exactly
         val title: TextView = view.findViewById(R.id.text_alert_title)
         val description: TextView = view.findViewById(R.id.text_description)
-        val badgeType: TextView = view.findViewById(R.id.badge_type)
         val badgeSeverity: TextView = view.findViewById(R.id.badge_severity)
+
+        // Technical Details
         val ssid: TextView = view.findViewById(R.id.text_ssid)
         val location: TextView = view.findViewById(R.id.text_location)
         val time: TextView = view.findViewById(R.id.text_time)
         val mac: TextView = view.findViewById(R.id.text_mac)
+
+        // Visuals & Actions
         val action: TextView = view.findViewById(R.id.text_action)
-        // Added this to control the icon color
         val alertIcon: ImageView = view.findViewById(R.id.img_alert_icon)
+        val btnResolve: MaterialButton = view.findViewById(R.id.btn_resolve)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AlertViewHolder {
@@ -50,10 +59,9 @@ class AlertsAdapter(private val alerts: List<AlertItem>) :
         val alert = alerts[position]
         val context = holder.itemView.context
 
-        // Bind Text Data
+        // Bind Text
         holder.title.text = alert.title
         holder.description.text = alert.description
-        holder.badgeType.text = alert.type
         holder.badgeSeverity.text = alert.severity
         holder.ssid.text = alert.ssid
         holder.location.text = alert.location
@@ -61,25 +69,32 @@ class AlertsAdapter(private val alerts: List<AlertItem>) :
         holder.mac.text = alert.macAddress
         holder.action.text = alert.recommendedAction
 
-        // Dynamic Styling based on Severity
+        // Dynamic Styling (Red/Orange/Yellow)
         when (alert.severity) {
             "CRITICAL" -> {
-                // Red Theme
                 holder.badgeSeverity.setBackgroundResource(R.drawable.badge_critical_bg)
                 holder.badgeSeverity.setTextColor(ContextCompat.getColor(context, R.color.red_700))
                 holder.alertIcon.setColorFilter(ContextCompat.getColor(context, R.color.red_600))
             }
             "HIGH" -> {
-                // Orange Theme
                 holder.badgeSeverity.setBackgroundResource(R.drawable.badge_high_bg)
                 holder.badgeSeverity.setTextColor(ContextCompat.getColor(context, R.color.orange_700))
                 holder.alertIcon.setColorFilter(ContextCompat.getColor(context, R.color.orange_600))
             }
             "MEDIUM" -> {
-                // Yellow/Neutral Theme
                 holder.badgeSeverity.setBackgroundResource(R.drawable.badge_neutral_bg)
                 holder.badgeSeverity.setTextColor(ContextCompat.getColor(context, R.color.slate_600))
                 holder.alertIcon.setColorFilter(ContextCompat.getColor(context, R.color.yellow_600))
+            }
+        }
+
+        // Logic: Show/Hide Resolve Button
+        if (alert.isResolved) {
+            holder.btnResolve.visibility = View.GONE
+        } else {
+            holder.btnResolve.visibility = View.VISIBLE
+            holder.btnResolve.setOnClickListener {
+                onResolveClick(alert.id)
             }
         }
     }
