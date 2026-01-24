@@ -49,7 +49,7 @@ android {
 
 dependencies {
     // ... other dependencies ...
-
+    implementation("com.google.code.gson:gson:2.10.1")
     // FIX FOR: activityViewModels
     implementation("androidx.fragment:fragment-ktx:1.8.6")
 

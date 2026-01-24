@@ -14,12 +14,12 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.util.Log
-import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.example.forenscan.R
 import com.example.forenscan.data.models.*
 import com.example.forenscan.data.repository.ForensicRepository
+import com.example.forenscan.ml.ThreatDetector
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -27,24 +27,26 @@ import java.util.UUID
 
 class FSWifiScanner : Service() {
 
+    // --- Core System Managers ---
     private lateinit var wifiManager: WifiManager
     private lateinit var repository: ForensicRepository
+    private lateinit var threatDetector: ThreatDetector
+
+    // --- Threading & Timing ---
     private val serviceScope = CoroutineScope(Dispatchers.IO)
     private val handler = Handler(Looper.getMainLooper())
-
-    // Scan every 30 seconds (Android Limitation)
-    private val SCAN_INTERVAL = 30000L
+    private val SCAN_INTERVAL = 30000L // 30 Seconds (Android restriction)
     private var isScanning = false
-
-    // Signal History for Anomaly Detection
-    private val signalHistory = mutableMapOf<String, MutableList<Int>>()
 
     override fun onCreate() {
         super.onCreate()
+
+        // 1. Initialize Managers
         wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
         repository = ForensicRepository(applicationContext)
+        threatDetector = ThreatDetector(applicationContext) // Initialize the Hybrid Brain
 
-        // Register Receiver for Scan Results
+        // 2. Register Receiver to listen for scan results
         val intentFilter = IntentFilter()
         intentFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)
         registerReceiver(scanReceiver, intentFilter)
@@ -56,6 +58,7 @@ class FSWifiScanner : Service() {
         return START_STICKY
     }
 
+    // --- FOREGROUND NOTIFICATION (Required for Background Scans) ---
     private fun startForegroundService() {
         val channelId = "ForenScanChannel"
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -70,23 +73,24 @@ class FSWifiScanner : Service() {
         startForeground(1, notification)
     }
 
+    // --- THE SCAN LOOP ---
     private fun startScanningLoop() {
         if (isScanning) return
         isScanning = true
 
         val scanRunnable = object : Runnable {
-            @SuppressLint("MissingPermission") // We check explicitly below
+            @SuppressLint("MissingPermission")
             override fun run() {
-                // 1. Explicit Check for Compiler/Runtime Safety
+                // 1. Safety Check: Do we have permission?
                 if (hasLocationPermission()) {
                     try {
-                        // 2. Try-Catch for SecurityException
+                        // 2. Trigger the scan
                         val success = wifiManager.startScan()
                         if (!success) {
-                            Log.w("FSWifiScanner", "Scan trigger failed (Throttle or hardware issue)")
+                            Log.w("FSWifiScanner", "Scan trigger throttled by Android system.")
                         }
                     } catch (e: SecurityException) {
-                        Log.e("FSWifiScanner", "Permission rejected during scan: ${e.message}")
+                        Log.e("FSWifiScanner", "Permission rejected during scan start: ${e.message}")
                     } catch (e: Exception) {
                         Log.e("FSWifiScanner", "General scan error: ${e.message}")
                     }
@@ -94,47 +98,64 @@ class FSWifiScanner : Service() {
                     Log.e("FSWifiScanner", "Missing Location Permission - Cannot Scan")
                 }
 
-                // Schedule next scan
+                // 3. Repeat
                 handler.postDelayed(this, SCAN_INTERVAL)
             }
         }
         handler.post(scanRunnable)
     }
 
+    // --- RECEIVER (Where the Data Arrives) ---
     private val scanReceiver = object : BroadcastReceiver() {
-        @SuppressLint("MissingPermission") // We check explicitly below
+        @SuppressLint("MissingPermission")
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == WifiManager.SCAN_RESULTS_AVAILABLE_ACTION) {
 
-                // 1. Explicit Check before accessing data
                 if (hasLocationPermission()) {
                     try {
-                        // 2. Accessing scanResults can throw SecurityException
+                        // A. Get Raw Scan Results
                         val results = wifiManager.scanResults
+
+                        // B. Get Current Connection Info (To identify "Active" network)
+                        val connectionInfo = wifiManager.connectionInfo
+                        val currentBSSID = connectionInfo.bssid // MAC of the router we are currently using
 
                         serviceScope.launch {
                             results.forEach { scanResult ->
 
-                                // Logic: Check for Signal Spikes
-                                val isSpike = checkSignalAnomaly(scanResult.BSSID, scanResult.level)
-                                val classification = if (isSpike) NetworkClassification.SUSPICIOUS else NetworkClassification.SAFE
+                                // 1. Check Connection Status
+                                // If the MAC matches our current router, mark it as connected
+                                val isConnected = (scanResult.BSSID == currentBSSID)
 
-                                // Create Model
+                                // 2. Hybrid Detection (ML + Rules)
+                                // We get a Classification Enum back (SAFE, SUSPICIOUS, or EVIL_TWIN)
+                                val classification = threatDetector.analyzeNetwork(
+                                    ssid = scanResult.SSID ?: "Hidden",
+                                    bssid = scanResult.BSSID,
+                                    signalStrength = scanResult.level,
+                                    capabilities = scanResult.capabilities
+                                )
+
+                                // 3. Determine if it's an Evil Twin based on the Enum
+                                val isEvilTwin = (classification == NetworkClassification.EVIL_TWIN)
+
+                                // 4. Create the Data Model
                                 val network = WifiNetwork(
-                                    ssid = scanResult.SSID,
+                                    ssid = scanResult.SSID ?: "Hidden",
                                     macAddress = scanResult.BSSID,
                                     encryption = scanResult.capabilities,
                                     frequency = "${scanResult.frequency}MHz",
                                     signalStrength = scanResult.level,
-                                    classification = classification,
-                                    timestamp = System.currentTimeMillis().toString()
+                                    classification = classification, // Pass the Enum directly here
+                                    timestamp = System.currentTimeMillis().toString(),
+                                    isConnected = isConnected
                                 )
 
-                                // Save to DB
+                                // 5. Save to Database
                                 repository.saveNetworkSnapshot(network)
 
-                                // Alert if Suspicious
-                                if (isSpike) {
+                                // 6. Alert if Threat Found
+                                if (isEvilTwin) {
                                     triggerThreatAlert(network)
                                 }
                             }
@@ -149,6 +170,8 @@ class FSWifiScanner : Service() {
         }
     }
 
+    // --- HELPERS ---
+
     private fun hasLocationPermission(): Boolean {
         return ContextCompat.checkSelfPermission(
             this,
@@ -156,26 +179,16 @@ class FSWifiScanner : Service() {
         ) == PackageManager.PERMISSION_GRANTED
     }
 
-    private fun checkSignalAnomaly(bssid: String, currentLevel: Int): Boolean {
-        val history = signalHistory.getOrPut(bssid) { mutableListOf() }
-        history.add(currentLevel)
-        if (history.size > 10) history.removeAt(0)
-
-        if (history.size < 3) return false
-        val avg = history.average()
-        return currentLevel > (avg + 15)
-    }
-
     private suspend fun triggerThreatAlert(network: WifiNetwork) {
         val alert = ThreatAlert(
             id = UUID.randomUUID().toString(),
-            title = "Signal Anomaly Detected",
-            description = "Sudden signal spike detected for ${network.ssid}.",
+            title = "Potential Evil Twin Detected",
+            description = "Suspicious signal patterns detected for '${network.ssid}'. Possible cloning attempt.",
             severity = ThreatSeverity.HIGH,
             networkName = network.ssid,
             macAddress = network.macAddress,
             timestamp = System.currentTimeMillis(),
-            recommendedAction = "Verify physical location of AP."
+            recommendedAction = "Disconnect immediately and verify the Access Point physically."
         )
         repository.insertThreat(alert)
     }
@@ -184,7 +197,7 @@ class FSWifiScanner : Service() {
         try {
             unregisterReceiver(scanReceiver)
         } catch (e: Exception) {
-            // Receiver might not be registered
+            // Receiver might not be registered if setup failed
         }
         super.onDestroy()
     }

@@ -1,11 +1,15 @@
 package com.example.forenscan.ui.fragments
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.toColorInt
 import androidx.fragment.app.Fragment
@@ -28,11 +32,29 @@ class DashboardFragment : Fragment() {
     private val binding get() = _binding!!
 
     // --- ViewModel (The Brain) ---
-    // We use activityViewModels() to share data with NetworksFragment
     private val viewModel: FSViewModel by activityViewModels()
 
     // --- State Variables ---
     private var isSystemStatusExpanded = false
+
+    // ============================================
+    // NEW: PERMISSION LAUNCHER (Handles the Pop-Up)
+    // ============================================
+    private val requestPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            // Check if Location was granted
+            val locationGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] ?: false
+
+            if (locationGranted) {
+                // User clicked "Allow" -> Start the scan
+                Toast.makeText(context, "Permission Granted. Starting Scan...", Toast.LENGTH_SHORT).show()
+                startRealScan()
+            } else {
+                // User clicked "Deny" -> Show explanation
+                Toast.makeText(context, "Location permission is required to scan Wi-Fi.", Toast.LENGTH_LONG).show()
+                stopScanVisuals()
+            }
+        }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -45,45 +67,92 @@ class DashboardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 1. Initial UI Setup (Static visuals)
+        // 1. Initial UI Setup
         setupStaticMetricCards()
         setupTopNavigation()
         setupScanButton()
         setupSystemStatusCard()
 
-        // 2. Connect to Database (Live Updates)
+        // 2. Connect to Database
         setupObservers()
 
         // 3. Setup Recent Activity
         setupRecentActivity()
 
-        // Set default tab state
+        // 4. Default Tab
         updateTabStyles(isNetworks = false)
+
+        // 5. NEW: Check permissions silently on startup (optional UX improvement)
+        checkAndRequestPermissions(onlyCheck = true)
     }
 
     // ============================================
-    // 1. DATA OBSERVERS (The "Live" Part)
+    // NEW: PERMISSION CHECKER LOGIC
+    // ============================================
+    private fun checkAndRequestPermissions(onlyCheck: Boolean = false): Boolean {
+        val permissionsToRequest = mutableListOf<String>()
+
+        // 1. Check Location (Required for Wi-Fi Scan)
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            permissionsToRequest.add(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+
+        // 2. Check Notifications (Android 13+ only)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                permissionsToRequest.add(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+
+        if (permissionsToRequest.isNotEmpty()) {
+            // We are missing permissions
+            if (!onlyCheck) {
+                // If this wasn't just a check, actually launch the pop-up
+                requestPermissionLauncher.launch(permissionsToRequest.toTypedArray())
+            }
+            return false
+        }
+
+        // We have all permissions
+        return true
+    }
+
+    // ============================================
+    // DATA OBSERVERS
     // ============================================
     private fun setupObservers() {
-
-        // A. Watch for Networks -> Update "Networks" Card
         viewModel.networks.observe(viewLifecycleOwner) { networks ->
             binding.cardNetworks.metricValueText.text = networks.size.toString()
             binding.cardNetworks.metricSubtext.text = "Last scan: Just now"
+
+            val connectedNet = networks.find { it.isConnected }
+            if (connectedNet != null) {
+                binding.cardConnections.metricValueText.text = "Active"
+                binding.cardConnections.metricSubtext.text = connectedNet.ssid
+                binding.cardConnections.metricIcon.setColorFilter(Color.parseColor("#4CAF50"))
+            } else {
+                binding.cardConnections.metricValueText.text = "None"
+                binding.cardConnections.metricSubtext.text = "Not Connected"
+                binding.cardConnections.metricIcon.setColorFilter(Color.GRAY)
+            }
         }
 
-        // B. Watch for Threats -> Update "Threats" Card & System Status
         viewModel.threats.observe(viewLifecycleOwner) { threats ->
-            // Update the small card
             binding.cardThreats.metricValueText.text = threats.size.toString()
-
-            // Update the Big Status Card (Red vs Green)
             updateSecurityStatus(threats)
+        }
+
+        viewModel.stats.observe(viewLifecycleOwner) { stats ->
+            if (stats != null) {
+                binding.cardUptime.metricTitleText.text = "Total Scans"
+                binding.cardUptime.metricValueText.text = stats.totalScans.toString()
+                binding.cardUptime.metricSubtext.text = "Since install"
+            }
         }
     }
 
     // ============================================
-    // 2. UI LOGIC & ANIMATIONS
+    // UI LOGIC & ANIMATIONS
     // ============================================
 
     private fun setupStaticMetricCards() {
@@ -92,7 +161,7 @@ class DashboardFragment : Fragment() {
                 metricIcon.setImageResource(iconRes)
                 metricIcon.setColorFilter(ContextCompat.getColor(requireContext(), accentColorRes))
                 metricTitleText.text = title
-                metricValueText.text = "-" // Placeholder until data loads
+                metricValueText.text = "-"
                 cardContentContainer.setBackgroundResource(hueDrawableRes)
             }
         }
@@ -100,10 +169,7 @@ class DashboardFragment : Fragment() {
         bindCardStyle(binding.cardNetworks, R.drawable.ic_wifi, R.color.networks_accent, getString(R.string.networks), R.drawable.bg_card_networks_hue)
         bindCardStyle(binding.cardThreats, R.drawable.ic_shield, R.color.threats_accent, getString(R.string.threats), R.drawable.bg_card_threats_hue)
         bindCardStyle(binding.cardConnections, R.drawable.ic_activity, R.color.connections_accent, getString(R.string.connections), R.drawable.bg_card_connections_hue)
-
         bindCardStyle(binding.cardUptime, R.drawable.ic_clock, R.color.uptime_accent, getString(R.string.uptime), R.drawable.bg_card_uptime_hue)
-        binding.cardUptime.metricValueText.text = "98%"
-        binding.cardUptime.metricSubtext.text = getString(R.string.protection_active)
     }
 
     private fun setupScanButton() {
@@ -113,8 +179,11 @@ class DashboardFragment : Fragment() {
                 it.animate().scaleX(1f).scaleY(1f).setDuration(100).start()
             }.start()
 
-            // Trigger Real Scan
-            startRealScan()
+            // UPDATED: Check Permission BEFORE Scanning
+            if (checkAndRequestPermissions(onlyCheck = false)) {
+                startRealScan()
+            }
+            // If false, the pop-up handles the rest
         }
     }
 
@@ -129,7 +198,7 @@ class DashboardFragment : Fragment() {
         viewModel.startScanningService()
         Toast.makeText(context, "Background Scan Started", Toast.LENGTH_SHORT).show()
 
-        // 3. Reset Button Visuals (Service keeps running, but button resets for user)
+        // 3. Reset Button Visuals
         binding.scanButton.postDelayed({
             stopScanVisuals()
         }, 3000)
@@ -148,27 +217,24 @@ class DashboardFragment : Fragment() {
         binding.statusCardContainer.visibility = View.VISIBLE
 
         if (threats.isNotEmpty()) {
-            // --- THREAT DETECTED (RED) ---
             binding.apply {
                 statusCardBg.setBackgroundResource(R.drawable.bg_card_threats_hue)
                 statusIcon.setImageResource(R.drawable.ic_warning)
-                statusIcon.setColorFilter(Color.parseColor("#F44336")) // Red
+                statusIcon.setColorFilter(Color.parseColor("#F44336"))
                 threatLevelText.text = "THREAT DETECTED"
                 threatDescriptionText.text = "${threats.size} Evil Twin attack(s) detected! Disconnect immediately."
             }
         } else {
-            // --- SECURE (GREEN) ---
             binding.apply {
                 statusCardBg.setBackgroundResource(R.drawable.bg_card_networks_hue)
                 statusIcon.setImageResource(R.drawable.ic_shield)
-                statusIcon.setColorFilter(Color.parseColor("#4CAF50")) // Green
+                statusIcon.setColorFilter(Color.parseColor("#4CAF50"))
                 threatLevelText.text = "SYSTEM SECURE"
                 threatDescriptionText.text = "No threats detected. Your connection is safe."
             }
         }
     }
 
-    // --- Collapsible System Status ---
     private fun setupSystemStatusCard() {
         binding.systemStatusHeader.setOnClickListener {
             toggleSystemStatusDetails()
@@ -178,12 +244,10 @@ class DashboardFragment : Fragment() {
     private fun toggleSystemStatusDetails() {
         isSystemStatusExpanded = !isSystemStatusExpanded
         binding.systemStatusDetails.visibility = if (isSystemStatusExpanded) View.VISIBLE else View.GONE
-
         val rotation = if (isSystemStatusExpanded) 180f else 0f
         binding.systemStatusArrow.animate().rotation(rotation).setDuration(300).start()
     }
 
-    // --- Recent Activity ---
     private fun setupRecentActivity() {
         val now = System.currentTimeMillis()
         val activityList = listOf(
@@ -198,17 +262,13 @@ class DashboardFragment : Fragment() {
         }
     }
 
-    // --- Navigation Logic ---
     private fun setupTopNavigation() {
         binding.btnNetworksTab.setOnClickListener {
             binding.overviewScrollView.visibility = View.GONE
             binding.networksFragmentContainer.visibility = View.VISIBLE
-
-            // Load Networks Fragment
             childFragmentManager.beginTransaction()
                 .replace(R.id.networks_fragment_container, NetworksFragment())
                 .commit()
-
             updateTabStyles(isNetworks = true)
         }
 
