@@ -38,6 +38,18 @@ class FSViewModel(application: Application) : AndroidViewModel(application) {
         getApplication<Application>().stopService(intent)
     }
 
+    // Add a check for ML availability
+    fun isMLModelAvailable(): Boolean {
+        return try {
+            val helper = com.example.forenscan.utils.MLModelHelper(getApplication())
+            val available = helper != null
+            helper.close()
+            available
+        } catch (e: Exception) {
+            false
+        }
+    }
+
     // --- EXPORT LOGIC ---
     fun exportLogs() {
         viewModelScope.launch {

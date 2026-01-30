@@ -1,4 +1,6 @@
 package com.example.forenscan.service
+import com.example.forenscan.utils.MLPrediction
+import com.example.forenscan.utils.MLModelHelper
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -36,6 +38,10 @@ class FSWifiScanner : Service() {
     private val SCAN_INTERVAL = 30000L
     private var isScanning = false
 
+    // Add model as a property
+
+    private var mlModel: MLModelHelper? = null
+
     // Signal History for Anomaly Detection
     private val signalHistory = mutableMapOf<String, MutableList<Int>>()
 
@@ -44,9 +50,24 @@ class FSWifiScanner : Service() {
         wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
         repository = ForensicRepository(applicationContext)
 
+        // Initialize the ML ModelHelper
+        mlModel = try {
+            MLModelHelper(this)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Log.e("FSWifiScanner", "LiteRT initialization failed: ${e.message}")
+            null // Fallback to rule-based detection if model initialization fails
+        }
+
+//        // Register Receiver for Scan Results
+//        val intentFilter = IntentFilter()
+//        intentFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)
+//        registerReceiver(scanReceiver, intentFilter)
+
         // Register Receiver for Scan Results
-        val intentFilter = IntentFilter()
-        intentFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)
+        val intentFilter = IntentFilter().apply {
+            addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)
+        }
         registerReceiver(scanReceiver, intentFilter)
     }
 
@@ -114,28 +135,32 @@ class FSWifiScanner : Service() {
 
                         serviceScope.launch {
                             results.forEach { scanResult ->
+                                // Prepare data for ML [cite: 176, 177]
+                                val features = extractFeaturesForML(scanResult)
 
-                                // Logic: Check for Signal Spikes
-                                val isSpike = checkSignalAnomaly(scanResult.BSSID, scanResult.level)
-                                val classification = if (isSpike) NetworkClassification.SUSPICIOUS else NetworkClassification.SAFE
+                                // Run LiteRT prediction (Calls CompiledModel.run internally)
+                                val probability = mlModel?.predict(features) ?: -1f
+                                val prediction = if (probability >= 0) MLPrediction.from(probability) else null
 
-                                // Create Model
+                                // Determine classification: ML primary, fallback to your spike logic [cite: 167, 170]
+                                val isEvil = prediction?.isEvilTwin ?: checkSignalAnomaly(scanResult.BSSID, scanResult.level)
+
                                 val network = WifiNetwork(
                                     ssid = scanResult.SSID,
                                     macAddress = scanResult.BSSID,
                                     encryption = scanResult.capabilities,
                                     frequency = "${scanResult.frequency}MHz",
                                     signalStrength = scanResult.level,
-                                    classification = classification,
+                                    classification = if (isEvil) NetworkClassification.SUSPICIOUS else NetworkClassification.SAFE,
                                     timestamp = System.currentTimeMillis().toString()
                                 )
 
-                                // Save to DB
+                                // Save real network data to DB
                                 repository.saveNetworkSnapshot(network)
 
-                                // Alert if Suspicious
-                                if (isSpike) {
-                                    triggerThreatAlert(network)
+                                // Trigger specific ML Alert if detected [cite: 185, 186]
+                                if (prediction?.isEvilTwin == true) {
+                                    triggerMLThreatAlert(network, prediction)
                                 }
                             }
                         }
@@ -180,14 +205,48 @@ class FSWifiScanner : Service() {
         repository.insertThreat(alert)
     }
 
+    private suspend fun triggerMLThreatAlert(network: WifiNetwork, prediction: MLPrediction) {
+        val alert = ThreatAlert(
+            id = UUID.randomUUID().toString(),
+            title = "ML-Detected Evil Twin",
+        description = "Machine learning model detected suspicious patterns in '${network.ssid}' with ${(prediction.probability * 100).toInt()}% confidence.",
+        severity = if (prediction.probability >= 0.9f) ThreatSeverity.CRITICAL else ThreatSeverity.HIGH,
+        networkName = network.ssid,
+            macAddress = network.macAddress,
+        timestamp = System.currentTimeMillis(),
+        recommendedAction = "Avoid connecting to this network. ML confidence: ${prediction.confidence}"
+        )
+        repository.insertThreat(alert)
+    }
+
     override fun onDestroy() {
+        // Critical Change: Properly close the LiteRT resources
+        // This ensures the CompiledModel and associated buffers are released
         try {
+            mlModel?.close()
+            mlModel = null
             unregisterReceiver(scanReceiver)
         } catch (e: Exception) {
             // Receiver might not be registered
+            Log.e("FSWifiScanner", "Error during cleanup: ${e.message}")
         }
         super.onDestroy()
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
+
+    // Feature Extraction Logic
+    private fun extractFeaturesForML(scanResult: android.net.wifi.ScanResult): FloatArray {
+        // 1. Frame protection (Encrypted = 1.0, Open = 0.0) [cite: 218, 222]
+        val protection = if (scanResult.capabilities.contains("Open", ignoreCase = true)) 0.0f else 1.0f
+
+        // 2. Signal strength (Normalize -100 to 0 dBm -> 0.0 to 1.0) [cite: 219, 227]
+        val signal = (scanResult.level + 100f) / 100f
+
+        // 3. Estimated Data Rate (Proxy based on frequency) [cite: 220, 230]
+        val dataRate = if (scanResult.frequency >= 5000) 0.8f else 0.5f
+
+        return floatArrayOf(protection, signal, dataRate)
+    }
+
 }

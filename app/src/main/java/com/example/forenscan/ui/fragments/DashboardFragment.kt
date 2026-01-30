@@ -10,6 +10,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.toColorInt
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.forenscan.R
 import com.example.forenscan.data.models.ActivityItem
@@ -20,6 +21,7 @@ import com.example.forenscan.databinding.FragmentDashboardBinding
 import com.example.forenscan.ui.adapters.ActivityAdapter
 import com.example.forenscan.ui.viewmodel.FSViewModel
 import java.util.UUID
+import kotlinx.coroutines.launch
 
 class DashboardFragment : Fragment() {
 
@@ -50,6 +52,14 @@ class DashboardFragment : Fragment() {
         setupTopNavigation()
         setupScanButton()
         setupSystemStatusCard()
+
+        // This checks if the RFC_EvilTwin.tflite model is active
+        viewLifecycleOwner.lifecycleScope.launch {
+            if (viewModel.isMLModelAvailable()) {
+                // Update button to show ML is ready
+                binding.scanButton.text = "Start ML Security Scan"
+            }
+        }
 
         // 2. Connect to Database (Live Updates)
         setupObservers()
@@ -135,12 +145,26 @@ class DashboardFragment : Fragment() {
         }, 3000)
     }
 
+//    private fun stopScanVisuals() { // previous stopScanVisuals
+//        if (_binding == null) return
+//        binding.scanButton.isEnabled = true
+//        binding.scanButton.setIconTintResource(android.R.color.white)
+//        binding.scanButton.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_scan)
+//        binding.scanButton.text = "Start Security Scan"
+//        binding.scanProgress.visibility = View.GONE
+//    }
+
     private fun stopScanVisuals() {
         if (_binding == null) return
         binding.scanButton.isEnabled = true
         binding.scanButton.setIconTintResource(android.R.color.white)
         binding.scanButton.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_scan)
-        binding.scanButton.text = "Start Security Scan"
+
+        // Check ML status again to restore the correct text
+        viewLifecycleOwner.lifecycleScope.launch {
+            binding.scanButton.text = if (viewModel.isMLModelAvailable()) "Start ML Security Scan" else "Start Security Scan"
+        }
+
         binding.scanProgress.visibility = View.GONE
     }
 

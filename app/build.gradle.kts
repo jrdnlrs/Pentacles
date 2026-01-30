@@ -7,6 +7,7 @@ plugins {
 android {
     namespace = "com.example.forenscan"
     compileSdk = 36
+    ndkVersion = "28.0.12433566"
 
     defaultConfig {
         applicationId = "com.example.forenscan"
@@ -28,16 +29,11 @@ android {
         }
     }
 
-    // ADD THIS BLOCK START
     buildFeatures {
         viewBinding = true
     }
-    // ADD THIS BLOCK END
 
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
+    // Removed duplicate compileOptions block
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -45,18 +41,23 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+
+    packaging {
+        jniLibs {
+            useLegacyPackaging = false
+        }
+    }
 }
 
 dependencies {
-    // ... other dependencies ...
-
     // FIX FOR: activityViewModels
     implementation("androidx.fragment:fragment-ktx:1.8.6")
 
     // FIX FOR: asLiveData and viewModelScope
+    // Removed the non-existent 2.10.0 version and kept the stable 2.8.7
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.7")
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.10.0")
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -67,9 +68,15 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
-    //room db
-    val room_version = "2.6.1"
+    // Room DB
+    val room_version = "2.8.4"
     implementation("androidx.room:room-runtime:$room_version")
     implementation("androidx.room:room-ktx:$room_version")
     kapt("androidx.room:room-compiler:$room_version")
+
+    // Modern High-Performance LiteRT
+    implementation("com.google.ai.edge.litert:litert:2.1.0")
+
+    // REMOVED: litert-gpu:1.4.1 (This was causing the Duplicate Class error)
+    // If you need GPU later, use version 2.1.0 instead.
 }
