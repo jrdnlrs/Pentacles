@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="scan_intervals">
+        <item>Fast (5 Seconds)</item>
+        <item>Balanced (30 Seconds)</item>
+        <item>Battery Saver (1 Minute)</item>
+    </string-array>
+</resources>
