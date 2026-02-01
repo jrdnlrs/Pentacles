@@ -5,13 +5,18 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.Spinner
+import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.forenscan.R
+import com.example.forenscan.data.models.ActivityItem
 import com.example.forenscan.data.models.ActivityType
 import com.example.forenscan.ui.adapters.TimelineAdapter
 import com.example.forenscan.ui.adapters.TimelineEvent
@@ -22,81 +27,112 @@ import java.util.Locale
 
 class TimelineFragment : Fragment() {
 
-    // 1. Connect to the Shared ViewModel
     private val viewModel: FSViewModel by activityViewModels()
+
+    // Data Holders
+    private var allEvents: List<ActivityItem> = emptyList()       // The Master List from DB
+    private var currentVisibleList: List<ActivityItem> = emptyList() // The Filtered List for UI/Export
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout
-        val view = inflater.inflate(R.layout.fragment_timeline, container, false)
-        return view
+        return inflater.inflate(R.layout.fragment_timeline, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 2. Setup the RecyclerView (List of Events)
         val recycler = view.findViewById<RecyclerView>(R.id.recycler_timeline)
         recycler.layoutManager = LinearLayoutManager(context)
+        val spinner = view.findViewById<Spinner>(R.id.spinner_filter)
+        val statusText = view.findViewById<TextView>(R.id.tv_status)
 
-        // 3. Observe REAL Data from Database
-        viewModel.history.observe(viewLifecycleOwner) { activities ->
-            // Convert database items to UI items
-            val timelineEvents = activities.map { item ->
-                TimelineEvent(
-                    title = item.title,
-                    description = item.description,
-                    timestamp = formatTimestamp(item.timestamp),
-                    ssid = "System", // Default tag, you can adjust this if needed
-                    isCritical = item.type == ActivityType.THREAT_DETECTED,
-                    techDetails = listOf("Event ID: ${item.id.take(8)}", "Type: ${item.type}")
-                )
+        // 1. SETUP SPINNER (The Dropdown)
+        val filterOptions = arrayOf("All Events", "Evil Twin Only")
+        val spinnerAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, filterOptions)
+        spinner.adapter = spinnerAdapter
+
+        // 2. SETUP SPINNER LISTENER
+        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                applyFilter(position, recycler, statusText)
             }
-
-            // If the list is empty, you might want to show a "No Activity" text here later
-            // For now, just set the adapter
-            recycler.adapter = TimelineAdapter(timelineEvents)
+            override fun onNothingSelected(parent: AdapterView<*>) {}
         }
 
-        // 4. Setup the Export Buttons
+        // 3. OBSERVE REAL DATA
+        viewModel.history.observe(viewLifecycleOwner) { activities ->
+            allEvents = activities // Save master list
+            // Re-apply whatever filter is currently selected
+            applyFilter(spinner.selectedItemPosition, recycler, statusText)
+        }
+
+        // 4. SETUP EXPORT BUTTONS
         setupExportButtons(view)
     }
 
+    // --- FILTER ENGINE ---
+    private fun applyFilter(position: Int, recycler: RecyclerView, statusText: TextView) {
+        // Filter the master list based on spinner position
+        currentVisibleList = if (position == 1) {
+            // Index 1 = "Evil Twin Only"
+            allEvents.filter { it.type == ActivityType.THREAT_DETECTED }
+        } else {
+            // Index 0 = "All Events"
+            allEvents
+        }
+
+        // Update Status Text
+        statusText.text = "Showing ${currentVisibleList.size} events • Filter: ${if (position == 1) "Critical" else "All"}"
+
+        // Convert to UI Items for Adapter
+        val uiEvents = currentVisibleList.map { item ->
+            TimelineEvent(
+                title = item.title,
+                description = item.description,
+                timestamp = formatTimestamp(item.timestamp),
+                ssid = "System",
+                isCritical = item.type == ActivityType.THREAT_DETECTED,
+                techDetails = listOf("Event ID: ${item.id.take(8)}", "Type: ${item.type}")
+            )
+        }
+        recycler.adapter = TimelineAdapter(uiEvents)
+    }
+
+    // --- EXPORT LOGIC ---
     private fun setupExportButtons(view: View) {
         val btnJson = view.findViewById<Button>(R.id.btn_export_json)
         val btnCsv = view.findViewById<Button>(R.id.btn_export_csv)
 
-        // --- JSON BUTTON CLICK ---
+        // Click Listeners pass 'currentVisibleList' so we only export what we see
         btnJson.setOnClickListener {
-            btnJson.isEnabled = false
-            Toast.makeText(context, "Generating JSON Log...", Toast.LENGTH_SHORT).show()
-            viewModel.exportTimeline("JSON")
-            btnJson.postDelayed({ btnJson.isEnabled = true }, 1000)
+            if (currentVisibleList.isNotEmpty()) {
+                Toast.makeText(context, "Exporting Filtered JSON...", Toast.LENGTH_SHORT).show()
+                viewModel.exportTimeline("JSON", currentVisibleList) // Passes the filtered list
+            } else {
+                Toast.makeText(context, "No events to export.", Toast.LENGTH_SHORT).show()
+            }
         }
 
-        // --- CSV BUTTON CLICK ---
         btnCsv.setOnClickListener {
-            btnCsv.isEnabled = false
-            Toast.makeText(context, "Generating CSV Report...", Toast.LENGTH_SHORT).show()
-            viewModel.exportTimeline("CSV")
-            btnCsv.postDelayed({ btnCsv.isEnabled = true }, 1000)
+            if (currentVisibleList.isNotEmpty()) {
+                Toast.makeText(context, "Exporting Filtered CSV...", Toast.LENGTH_SHORT).show()
+                viewModel.exportTimeline("CSV", currentVisibleList) // Passes the filtered list
+            } else {
+                Toast.makeText(context, "No events to export.", Toast.LENGTH_SHORT).show()
+            }
         }
 
-        // --- OBSERVE EXPORT RESULT (FIXED) ---
-        // We use 'it' to refer to the URI passed by the LiveData
+        // Observe Export Result (Launch Share Sheet)
         viewModel.timelineExportStatus.observe(viewLifecycleOwner) { fileUri ->
             if (fileUri != null) {
-                // Open the Android Share Sheet
                 val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                    type = "text/*" // Supports both CSV and JSON
+                    type = "text/*"
                     putExtra(Intent.EXTRA_STREAM, fileUri)
                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 }
                 startActivity(Intent.createChooser(shareIntent, "Save Forensic Log To..."))
-
-                // Reset the status so it doesn't trigger again
                 viewModel.timelineExportStatus.postValue(null)
             }
         }

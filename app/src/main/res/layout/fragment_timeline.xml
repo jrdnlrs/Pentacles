@@ -76,35 +76,30 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:orientation="horizontal">
+                    android:orientation="vertical">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/bg_rounded_white_stroke"
-                        android:paddingHorizontal="12dp"
-                        android:paddingVertical="8dp"
-                        android:text="Last 24h ▼"
-                        android:textSize="13sp"
-                        android:textColor="#475569"
-                        android:layout_marginEnd="12dp"/>
+                        android:text="Filter Evidence:"
+                        android:textSize="12sp"
+                        android:textColor="#64748B"
+                        android:layout_marginBottom="4dp"/>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                    <Spinner
+                        android:id="@+id/spinner_filter"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
                         android:background="@drawable/bg_rounded_white_stroke"
-                        android:paddingHorizontal="12dp"
-                        android:paddingVertical="8dp"
-                        android:text="All Events ▼"
-                        android:textSize="13sp"
-                        android:textColor="#475569"/>
+                        android:spinnerMode="dropdown" />
                 </LinearLayout>
 
                 <TextView
+                    android:id="@+id/tv_status"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:text="Showing 6 events • Last updated: Just now"
+                    android:text="Showing events • Last updated: Just now"
                     android:textColor="#94A3B8"
                     android:textSize="12sp" />
             </LinearLayout>
@@ -153,7 +148,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Forensic Reports para sa Professionals"
+                    android:text="Forensic Reports for Professionals"
                     android:textColor="#15803D"
                     android:textSize="15sp"
                     android:textStyle="bold" />
@@ -163,7 +158,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
-                android:text="Ang timeline na ito ay makakatulong sa cybersecurity professionals na mag-analyze ng Evil Twin attacks:"
+                android:text="This timeline helps cybersecurity professionals analyze Evil Twin attacks:"
                 android:textColor="#166534"
                 android:textSize="14sp"
                 android:lineSpacingExtra="4dp"/>
@@ -171,144 +166,11 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="• I-export ang data as PDF/CSV para sa incident reports\n• Gamitin ang timestamps para sa correlation with other security logs\n• I-share sa CERT-PH kung may nakitang organized attacks"
+                android:text="• Export data as PDF/CSV for incident reports\n• Use timestamps for correlation with other logs\n• Share with CERT-PH if organized attacks are found"
                 android:textColor="#166534"
                 android:textSize="13sp"
                 android:lineSpacingExtra="6dp"/>
         </LinearLayout>
-
-
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0dp"
-            app:strokeWidth="0dp"
-            app:cardBackgroundColor="@android:color/white">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="20dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="20dp"
-                    android:text="Analysis Summary"
-                    android:textColor="#0F172A"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="20dp"
-                    android:orientation="horizontal">
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Total Events"
-                            android:textColor="#64748B"
-                            android:textSize="13sp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:text="6"
-                            android:textColor="#0F172A"
-                            android:textSize="24sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Critical Events"
-                            android:textColor="#64748B"
-                            android:textSize="13sp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:text="1"
-                            android:textColor="#EF4444"
-                            android:textSize="24sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Networks Monitored"
-                            android:textColor="#64748B"
-                            android:textSize="13sp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:text="4"
-                            android:textColor="#0F172A"
-                            android:textSize="24sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Time Range"
-                            android:textColor="#64748B"
-                            android:textSize="13sp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:text="24h"
-                            android:textColor="#0F172A"
-                            android:textSize="24sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-                </LinearLayout>
-
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>
