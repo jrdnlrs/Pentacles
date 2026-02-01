@@ -44,7 +44,7 @@ android {
 
     packaging {
         jniLibs {
-            useLegacyPackaging = false
+            useLegacyPackaging = true
         }
     }
 }
@@ -67,6 +67,9 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+    // JSON Parsing
+    implementation("com.google.code.gson:gson:2.13.2")
 
     // Room DB
     val room_version = "2.8.4"

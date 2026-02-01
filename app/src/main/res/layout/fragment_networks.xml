@@ -60,7 +60,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Found 5 networks • 1 threats detected"
+                android:text="Ready to scan"
                 android:textSize="14sp"
                 android:textColor="#9CA3AF" />
         </LinearLayout>

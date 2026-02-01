@@ -54,8 +54,10 @@ abstract class ForensicDatabase : RoomDatabase() {
 
 @Dao
 interface NetworkDataDao {
-    @Query("SELECT * FROM network_data ORDER BY timestamp DESC")
-    fun getAllNetworks(): Flow<List<NetworkDataEntity>>
+    // OLD: @Query("SELECT * FROM network_data ORDER BY timestamp DESC")
+    // NEW: Only get the most recent entry for each BSSID
+    @Query("SELECT * FROM network_data WHERE id IN (SELECT MAX(id) FROM network_data GROUP BY bssid) ORDER BY signalStrength DESC")
+    fun getUniqueNetworks(): Flow<List<NetworkDataEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertNetwork(network: NetworkDataEntity)
