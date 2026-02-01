@@ -1,14 +1,13 @@
 package com.example.forenscan.ui.fragments
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.Spinner
+import android.widget.AutoCompleteTextView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -18,15 +17,17 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.forenscan.R
 import com.example.forenscan.data.models.ActivityItem
 import com.example.forenscan.data.models.ActivityType
+import com.example.forenscan.data.models.viewmodel.FSViewModel
 import com.example.forenscan.ui.adapters.TimelineAdapter
 import com.example.forenscan.ui.adapters.TimelineEvent
-import com.example.forenscan.ui.viewmodel.FSViewModel
+import com.google.android.material.textfield.TextInputLayout
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 class TimelineFragment : Fragment() {
 
+    // 1. Connect to the Shared ViewModel located in data.models
     private val viewModel: FSViewModel by activityViewModels()
 
     // Data Holders
@@ -43,96 +44,93 @@ class TimelineFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // 1. Bind UI elements
         val recycler = view.findViewById<RecyclerView>(R.id.recycler_timeline)
+        val exportMenu = view.findViewById<TextInputLayout>(R.id.menu_export)
+        val dropdownText = view.findViewById<AutoCompleteTextView>(R.id.export_dropdown)
+        val exportHint = view.findViewById<TextView>(R.id.tv_export_hint)
+
         recycler.layoutManager = LinearLayoutManager(context)
         val spinner = view.findViewById<Spinner>(R.id.spinner_filter)
         val statusText = view.findViewById<TextView>(R.id.tv_status)
 
-        // 1. SETUP SPINNER (The Dropdown)
-        val filterOptions = arrayOf("All Events", "Evil Twin Only")
-        val spinnerAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, filterOptions)
-        spinner.adapter = spinnerAdapter
-
-        // 2. SETUP SPINNER LISTENER
-        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                applyFilter(position, recycler, statusText)
-            }
-            override fun onNothingSelected(parent: AdapterView<*>) {}
-        }
-
-        // 3. OBSERVE REAL DATA
+        // 2. Observe REAL Data from Database for forensic analysis
         viewModel.history.observe(viewLifecycleOwner) { activities ->
-            allEvents = activities // Save master list
-            // Re-apply whatever filter is currently selected
-            applyFilter(spinner.selectedItemPosition, recycler, statusText)
+            val timelineEvents = activities.map { item ->
+                TimelineEvent(
+                    title = item.title,
+                    description = item.description,
+                    timestamp = formatTimestamp(item.timestamp),
+                    ssid = "System",
+                    isCritical = item.type == ActivityType.THREAT_DETECTED,
+                    techDetails = listOf("Event ID: ${item.id.take(8)}", "Type: ${item.type}")
+                )
+            }
+            recycler.adapter = TimelineAdapter(timelineEvents)
         }
 
-        // 4. SETUP EXPORT BUTTONS
-        setupExportButtons(view)
-    }
+        // 3. Observe the "Export Enabled" toggle state from FSViewModel
+        viewModel.isExportEnabled.observe(viewLifecycleOwner) { isEnabled ->
+            // Controls the "initial look" and lock based on Settings Fragment
+            exportMenu.isEnabled = isEnabled
 
-    // --- FILTER ENGINE ---
-    private fun applyFilter(position: Int, recycler: RecyclerView, statusText: TextView) {
-        // Filter the master list based on spinner position
-        currentVisibleList = if (position == 1) {
-            // Index 1 = "Evil Twin Only"
-            allEvents.filter { it.type == ActivityType.THREAT_DETECTED }
-        } else {
-            // Index 0 = "All Events"
-            allEvents
-        }
-
-        // Update Status Text
-        statusText.text = "Showing ${currentVisibleList.size} events • Filter: ${if (position == 1) "Critical" else "All"}"
-
-        // Convert to UI Items for Adapter
-        val uiEvents = currentVisibleList.map { item ->
-            TimelineEvent(
-                title = item.title,
-                description = item.description,
-                timestamp = formatTimestamp(item.timestamp),
-                ssid = "System",
-                isCritical = item.type == ActivityType.THREAT_DETECTED,
-                techDetails = listOf("Event ID: ${item.id.take(8)}", "Type: ${item.type}")
-            )
-        }
-        recycler.adapter = TimelineAdapter(uiEvents)
-    }
-
-    // --- EXPORT LOGIC ---
-    private fun setupExportButtons(view: View) {
-        val btnJson = view.findViewById<Button>(R.id.btn_export_json)
-        val btnCsv = view.findViewById<Button>(R.id.btn_export_csv)
-
-        // Click Listeners pass 'currentVisibleList' so we only export what we see
-        btnJson.setOnClickListener {
-            if (currentVisibleList.isNotEmpty()) {
-                Toast.makeText(context, "Exporting Filtered JSON...", Toast.LENGTH_SHORT).show()
-                viewModel.exportTimeline("JSON", currentVisibleList) // Passes the filtered list
+            if (isEnabled) {
+                // Feature Enabled: Hide hint and use active colors
+                exportHint.visibility = View.GONE
+                dropdownText.setTextColor(Color.parseColor("#475569"))
             } else {
-                Toast.makeText(context, "No events to export.", Toast.LENGTH_SHORT).show()
+                // Feature Disabled: Show hint and use disabled gray
+                exportHint.visibility = View.VISIBLE
+                dropdownText.setTextColor(Color.parseColor("#CBD5E1"))
+                dropdownText.setText("Export to:", false)
             }
         }
 
-        btnCsv.setOnClickListener {
-            if (currentVisibleList.isNotEmpty()) {
-                Toast.makeText(context, "Exporting Filtered CSV...", Toast.LENGTH_SHORT).show()
-                viewModel.exportTimeline("CSV", currentVisibleList) // Passes the filtered list
-            } else {
-                Toast.makeText(context, "No events to export.", Toast.LENGTH_SHORT).show()
+        // 4. Setup the "Export to:" Dropdown Menu (JSON, CSV, PDF)
+        setupExportDropdown(view)
+
+        // 5. Observe the Export result to trigger the Share Sheet
+        observeExportStatus()
+    }
+
+    private fun setupExportDropdown(view: View) {
+        val dropdownText = view.findViewById<AutoCompleteTextView>(R.id.export_dropdown)
+
+        // Define forensic export options
+        val exportOptions = arrayOf("JSON", "CSV", "PDF")
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, exportOptions)
+        dropdownText.setAdapter(adapter)
+
+        dropdownText.setOnItemClickListener { _, _, position, _ ->
+            val selectedFormat = exportOptions[position]
+            Toast.makeText(context, "Generating $selectedFormat Report...", Toast.LENGTH_SHORT).show()
+
+            // Trigger the ViewModel export logic
+            viewModel.exportTimeline(selectedFormat)
+
+            // Reset dropdown text to "Export to:" after selection
+            dropdownText.post {
+                dropdownText.setText("Export to:", false)
             }
         }
+    }
 
-        // Observe Export Result (Launch Share Sheet)
+    private fun observeExportStatus() {
         viewModel.timelineExportStatus.observe(viewLifecycleOwner) { fileUri ->
             if (fileUri != null) {
                 val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                    type = "text/*"
+                    // Handles both text-based logs and PDF documents
+                    type = if (fileUri.toString().contains("pdf", ignoreCase = true)) {
+                        "application/pdf"
+                    } else {
+                        "text/*"
+                    }
                     putExtra(Intent.EXTRA_STREAM, fileUri)
                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 }
                 startActivity(Intent.createChooser(shareIntent, "Save Forensic Log To..."))
+
+                // Reset status to prevent triggering the share sheet again on rotation
                 viewModel.timelineExportStatus.postValue(null)
             }
         }

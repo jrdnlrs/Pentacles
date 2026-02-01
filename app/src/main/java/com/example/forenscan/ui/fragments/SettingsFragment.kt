@@ -12,12 +12,16 @@ import android.widget.Spinner
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import com.example.forenscan.R
+import com.example.forenscan.data.models.viewmodel.FSViewModel
 import com.google.android.material.switchmaterial.SwitchMaterial
 
 class SettingsFragment : Fragment() {
 
     private lateinit var sharedPref: SharedPreferences
+
+    private val viewModel: FSViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -104,15 +108,18 @@ class SettingsFragment : Fragment() {
 
     // --- 3. EXPORT PERMISSION ---
     private fun setupExportPermission(view: View) {
-        // This switch controls if the buttons on the Timeline Fragment are active
         val switch = view.findViewById<SwitchMaterial>(R.id.report_export_switch)
 
-        switch.isChecked = sharedPref.getBoolean("ALLOW_EXPORT", true)
+        // Load saved state (Defaulting to false for "initial look" requirement)
+        val isAllowed = sharedPref.getBoolean("ALLOW_EXPORT", false)
+        switch.isChecked = isAllowed
+
+        // Set initial ViewModel value
+        viewModel.setExportFeature(isAllowed)
 
         switch.setOnCheckedChangeListener { _, isChecked ->
             sharedPref.edit().putBoolean("ALLOW_EXPORT", isChecked).apply()
-            val status = if (isChecked) "Enabled" else "Disabled"
-            Toast.makeText(context, "Forensic Export $status", Toast.LENGTH_SHORT).show()
+            viewModel.setExportFeature(isChecked) // Sends status to ViewModel
         }
     }
 

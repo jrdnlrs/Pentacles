@@ -231,7 +231,7 @@ class DashboardFragment : Fragment() {
 
         // Check ML status again to restore the correct text
         viewLifecycleOwner.lifecycleScope.launch {
-            binding.scanButton.text = if (viewModel.isMLModelAvailable()) "Start ML Security Scan" else "Start Security Scan"
+            binding.scanButton.text = if (viewModel.isMLModelAvailable()) "Start Security Scan" else "Start Security Scan"
         }
 
         binding.scanProgress.visibility = View.GONE
