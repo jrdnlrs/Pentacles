@@ -21,7 +21,7 @@ class Converters {
         ActivityEventEntity::class,
         SystemStatsEntity::class
     ],
-    version = 1,
+    version = 2, // UPDATED: Changed from 1 to 2
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -60,8 +60,8 @@ interface NetworkDataDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertNetwork(network: NetworkDataEntity)
 
-    // Used to clean up old data but keep evidence
-    @Query("DELETE FROM network_data WHERE isDuplicate = 0 AND timestamp < :cutoffTime")
+    // Note: Updated logic for cleaning up might be needed later, but this query is safe for now
+    @Query("DELETE FROM network_data WHERE classification = 'SAFE' AND timestamp < :cutoffTime")
     suspend fun deleteOldSafeNetworks(cutoffTime: Long)
 }
 
@@ -103,7 +103,6 @@ interface SystemStatsDao {
     @Query("UPDATE system_stats SET threatsDetected = :count WHERE id = 1")
     suspend fun updateThreatCount(count: Int)
 
-    // Simple helper to increment total scans
     @Query("UPDATE system_stats SET totalScans = totalScans + 1")
     suspend fun incrementTotalScans()
 

@@ -15,7 +15,7 @@ data class NetworkDataEntity(
     val securityType: String,
     val timestamp: Long,
     val isConnected: Boolean,
-    val isDuplicate: Boolean // True if Evil Twin
+    val classification: String // UPDATED: Was Boolean, now String to store "SUSPICIOUS"
 )
 
 // 2. Table for Threat Alerts

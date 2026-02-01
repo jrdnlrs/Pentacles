@@ -15,10 +15,6 @@ import java.util.UUID
 /**
  * ForensicRepository
  * * The Single Source of Truth for the application.
- * - Saves network snapshots from the Scanner Service.
- * - Provides LiveData to the ViewModel/Dashboard.
- * - Logs forensic timeline events.
- * - Tracks system statistics (Total Scans, Threats Found).
  */
 class ForensicRepository(context: Context) {
 
@@ -33,43 +29,28 @@ class ForensicRepository(context: Context) {
     // 1. GET DATA (Used by ViewModel to update UI)
     // =================================================================
 
-    /**
-     * Returns a live stream of all scanned networks.
-     */
     fun getAllNetworks(): Flow<List<WifiNetwork>> {
         return networkDataDao.getAllNetworks().map { entities ->
             entities.map { it.toDomain() }
         }
     }
 
-    /**
-     * Returns a live stream of all threats (Historical & Active).
-     */
     fun getAllThreats(): Flow<List<ThreatAlert>> {
         return threatAlertDao.getAllAlerts().map { entities ->
             entities.map { it.toDomain() }
         }
     }
 
-    /**
-     * Returns only active threats for the Dashboard Status Card.
-     */
     fun getActiveThreats(): Flow<List<ThreatAlert>> {
         return threatAlertDao.getActiveAlerts().map { entities ->
             entities.map { it.toDomain() }
         }
     }
 
-    /**
-     * Returns the System Stats (Total Scans, etc.)
-     */
     fun getSystemStats(): Flow<SystemStats?> {
         return systemStatsDao.getStats().map { it?.toDomain() }
     }
 
-    /**
-     * Returns the Timeline Events (Forensic History)
-     */
     fun getRecentActivity(): Flow<List<ActivityItem>> {
         return activityEventDao.getAllEvents().map { entities ->
             entities.map { it.toDomain() }
@@ -80,10 +61,6 @@ class ForensicRepository(context: Context) {
     // 2. SAVE DATA (Used by FSWifiScanner Service)
     // =================================================================
 
-    /**
-     * Saves a snapshot of a single network scan result.
-     * Also updates the total scan counter.
-     */
     suspend fun saveNetworkSnapshot(network: WifiNetwork) {
         // 1. Save the Network
         val entity = network.toEntity()
@@ -112,17 +89,10 @@ class ForensicRepository(context: Context) {
         }
     }
 
-    /**
-     * Saves a high-priority threat alert and logs it to the timeline.
-     */
     suspend fun insertThreat(alert: ThreatAlert) {
-        // 1. Save Alert
         threatAlertDao.insertAlert(alert.toEntity())
-
-        // 2. Update Stats
         systemStatsDao.incrementThreatsDetected()
 
-        // 3. Log to Activity Timeline
         val event = ActivityItem(
             id = UUID.randomUUID().toString(),
             title = "Threat Detected",
@@ -133,9 +103,6 @@ class ForensicRepository(context: Context) {
         activityEventDao.insertEvent(event.toEntity())
     }
 
-    /**
-     * Marks a threat as "Resolved" (e.g., user clicked "Ignore").
-     */
     suspend fun markThreatResolved(alertId: String) {
         threatAlertDao.markAsResolved(alertId)
     }
@@ -150,11 +117,11 @@ class ForensicRepository(context: Context) {
         bssid = macAddress,
         signalStrength = signalStrength,
         frequency = parseFrequency(frequency),
-        channel = frequencyToChannel(parseFrequency(frequency)), // Calculate Channel
+        channel = frequencyToChannel(parseFrequency(frequency)),
         securityType = encryption,
         timestamp = System.currentTimeMillis(),
         isConnected = isConnected,
-        isDuplicate = classification == NetworkClassification.EVIL_TWIN
+        classification = classification.name // UPDATED: Saves "SAFE", "SUSPICIOUS", etc.
     )
 
     private fun NetworkDataEntity.toDomain() = WifiNetwork(
@@ -163,8 +130,13 @@ class ForensicRepository(context: Context) {
         encryption = securityType,
         frequency = "${frequency}MHz",
         signalStrength = signalStrength,
-        classification = if (isDuplicate) NetworkClassification.EVIL_TWIN else NetworkClassification.SAFE,
+        classification = try {
+            NetworkClassification.valueOf(classification) // UPDATED: Reads back Enum
+        } catch (e: Exception) {
+            NetworkClassification.SAFE
+        },
         isConnected = isConnected,
+        isDuplicate = classification == "EVIL_TWIN",
         timestamp = timestamp.toString()
     )
 
@@ -173,7 +145,7 @@ class ForensicRepository(context: Context) {
         id = id,
         title = title,
         description = description,
-        severity = severity.name, // Enum to String
+        severity = severity.name,
         networkName = networkName,
         macAddress = macAddress,
         timestamp = timestamp,
@@ -185,7 +157,7 @@ class ForensicRepository(context: Context) {
         id = id,
         title = title,
         description = description,
-        severity = ThreatSeverity.valueOf(severity), // String to Enum
+        severity = ThreatSeverity.valueOf(severity),
         networkName = networkName,
         macAddress = macAddress,
         timestamp = timestamp,
@@ -223,7 +195,6 @@ class ForensicRepository(context: Context) {
     // =================================================================
 
     private fun parseFrequency(freqString: String): Int {
-        // Removes "MHz" and converts to Int (e.g., "2412MHz" -> 2412)
         return freqString.replace("MHz", "").trim().toIntOrNull() ?: 2400
     }
 
@@ -233,7 +204,7 @@ class ForensicRepository(context: Context) {
             freq < 2484 -> (freq - 2407) / 5
             freq in 4910..4980 -> (freq - 4000) / 5
             freq < 5935 -> (freq - 5000) / 5
-            else -> 0 // Unknown
+            else -> 0
         }
     }
 }
