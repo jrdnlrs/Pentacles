@@ -52,7 +52,7 @@
                     android:textColor="#1A1C1E"
                     android:textSize="17sp"
                     android:textStyle="bold"
-                    tools:text="SM_M..." />
+                    tools:text="SM_Mall Wifi Free..." />
 
                 <TextView
                     android:id="@+id/connectedBadge"
@@ -82,11 +82,12 @@
 
             <LinearLayout
                 android:id="@+id/subInfoContainer"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
+                app:layout_constraintEnd_toStartOf="@+id/statusIconSmall"
                 app:layout_constraintStart_toStartOf="@id/headerContainer"
                 app:layout_constraintTop_toBottomOf="@id/headerContainer">
 
@@ -98,12 +99,15 @@
 
                 <TextView
                     android:id="@+id/encryption"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="4dp"
+                    android:layout_weight="1"
+                    android:ellipsize="end"
+                    android:maxLines="1"
                     android:textColor="#666666"
                     android:textSize="12sp"
-                    tools:text="WPA2" />
+                    tools:text="WPA2-PSK-AES-CCMP-LONG-NAME" />
 
                 <TextView
                     android:id="@+id/frequencyText"
@@ -130,25 +134,14 @@
                     android:textSize="12sp"
                     tools:text="85%" />
             </LinearLayout>
-
             <ImageView
                 android:id="@+id/statusIconSmall"
                 android:layout_width="18dp"
                 android:layout_height="18dp"
-                android:layout_marginEnd="12dp"
-                app:layout_constraintBottom_toBottomOf="@+id/expandArrow"
-                app:layout_constraintEnd_toStartOf="@id/expandArrow"
-                app:layout_constraintTop_toTopOf="@+id/expandArrow"
-                tools:src="@drawable/ic_check_circle" />
-
-            <ImageView
-                android:id="@+id/expandArrow"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:src="@drawable/ic_eye"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                tools:src="@drawable/ic_check_circle" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
