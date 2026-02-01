@@ -88,31 +88,26 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:orientation="horizontal">
+                    android:orientation="vertical">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/bg_rounded_white_stroke"
-                        android:paddingHorizontal="12dp"
-                        android:paddingVertical="8dp"
-                        android:text="Last 24h ▼"
-                        android:textSize="13sp"
-                        android:textColor="#475569"
-                        android:layout_marginEnd="12dp"/>
+                        android:text="Filter Evidence:"
+                        android:textSize="12sp"
+                        android:textColor="#64748B"
+                        android:layout_marginBottom="4dp"/>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                    <Spinner
+                        android:id="@+id/spinner_filter"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
                         android:background="@drawable/bg_rounded_white_stroke"
-                        android:paddingHorizontal="12dp"
-                        android:paddingVertical="8dp"
-                        android:text="All Events ▼"
-                        android:textSize="13sp"
-                        android:textColor="#475569"/>
+                        android:spinnerMode="dropdown" />
                 </LinearLayout>
 
                 <TextView
+                    android:id="@+id/tv_status"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"

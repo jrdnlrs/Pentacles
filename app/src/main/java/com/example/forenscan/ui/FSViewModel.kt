@@ -21,7 +21,7 @@ import kotlinx.coroutines.launch
 class FSViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = ForensicRepository(application)
-    private val exportManager = ExportManager(application) // Connects to the ExportManager
+    private val exportManager = ExportManager(application)
 
     // --- LIVE DATA (Database -> UI) ---
     val networks: LiveData<List<WifiNetwork>> = repository.getAllNetworks().asLiveData()
@@ -48,7 +48,6 @@ class FSViewModel(application: Application) : AndroidViewModel(application) {
         getApplication<Application>().stopService(intent)
     }
 
-    // Add a check for ML availability
     fun isMLModelAvailable(): Boolean {
         return try {
             val helper = com.example.forenscan.utils.MLModelHelper(getApplication())
@@ -58,6 +57,37 @@ class FSViewModel(application: Application) : AndroidViewModel(application) {
         } catch (e: Exception) {
             false
         }
+    }
+
+    fun getNetworkStatus(): Map<String, String> {
+        val wifiManager = getApplication<Application>().getSystemService(android.content.Context.WIFI_SERVICE) as android.net.wifi.WifiManager
+        val info = wifiManager.connectionInfo
+        val dhcp = wifiManager.dhcpInfo
+
+        // 1. IP Address
+        val ipString = if (info.ipAddress != 0) {
+            android.text.format.Formatter.formatIpAddress(info.ipAddress)
+        } else {
+            "Disconnected"
+        }
+
+        // 2. Band / Frequency
+        val frequency = info.frequency
+        val band = when {
+            frequency > 5000 -> "5GHz"
+            frequency > 2400 -> "2.4GHz"
+            else -> "Unknown"
+        }
+
+        // 3. Gateway (Router IP)
+        val gateway = android.text.format.Formatter.formatIpAddress(dhcp.gateway)
+
+        return mapOf(
+            "IP Address" to ipString,
+            "Gateway" to gateway,
+            "Band" to band,
+            "Speed" to "${info.linkSpeed} Mbps"
+        )
     }
 
     // --- EXPORT LOGIC ---
@@ -70,32 +100,32 @@ class FSViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // --- FUNCTION 2: Export Timeline (Timeline Tab) ---
-    // This is the missing function causing your error!
-    fun exportTimeline(format: String) {
+    // --- UPDATED FUNCTION: Export Timeline ---
+    // Now accepts an optional 'filteredList' so you can export exactly what is on screen
+    fun exportTimeline(format: String, filteredList: List<ActivityItem>? = null) {
         viewModelScope.launch {
-            val currentHistory = repository.getRecentActivity().first()
+            // 1. If the UI sent a list, use it. Otherwise, fetch all from DB.
+            val dataToExport = filteredList ?: repository.getRecentActivity().first()
 
+            // 2. Pass that data to your ExportManager
             val uri = if (format == "JSON") {
-                exportManager.generateTimelineJson(currentHistory)
+                exportManager.generateTimelineJson(dataToExport)
             } else {
-                exportManager.generateTimelineCsv(currentHistory)
+                exportManager.generateTimelineCsv(dataToExport)
             }
 
+            // 3. Notify UI
             timelineExportStatus.postValue(uri)
         }
     }
+
     fun resolveThreat(threatId: String) {
         viewModelScope.launch {
-            // Find the threat and mark it as resolved
             val currentList = threats.value ?: return@launch
             val threatToUpdate = currentList.find { it.id == threatId }
 
             if (threatToUpdate != null) {
-                // Create a copy with isResolved = true
                 val updatedThreat = threatToUpdate.copy(isResolved = true)
-
-                // Update in Database (Insert with same ID = Overwrite)
                 repository.insertThreat(updatedThreat)
             }
         }

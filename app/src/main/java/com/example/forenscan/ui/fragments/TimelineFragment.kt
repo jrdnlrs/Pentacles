@@ -15,6 +15,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.forenscan.R
+import com.example.forenscan.data.models.ActivityItem
 import com.example.forenscan.data.models.ActivityType
 import com.example.forenscan.data.models.viewmodel.FSViewModel
 import com.example.forenscan.ui.adapters.TimelineAdapter
@@ -28,6 +29,10 @@ class TimelineFragment : Fragment() {
 
     // 1. Connect to the Shared ViewModel located in data.models
     private val viewModel: FSViewModel by activityViewModels()
+
+    // Data Holders
+    private var allEvents: List<ActivityItem> = emptyList()       // The Master List from DB
+    private var currentVisibleList: List<ActivityItem> = emptyList() // The Filtered List for UI/Export
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -46,6 +51,8 @@ class TimelineFragment : Fragment() {
         val exportHint = view.findViewById<TextView>(R.id.tv_export_hint)
 
         recycler.layoutManager = LinearLayoutManager(context)
+        val spinner = view.findViewById<Spinner>(R.id.spinner_filter)
+        val statusText = view.findViewById<TextView>(R.id.tv_status)
 
         // 2. Observe REAL Data from Database for forensic analysis
         viewModel.history.observe(viewLifecycleOwner) { activities ->

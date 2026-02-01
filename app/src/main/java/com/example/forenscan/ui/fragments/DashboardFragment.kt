@@ -265,11 +265,32 @@ class DashboardFragment : Fragment() {
         }
     }
 
+    // REPLACE your old toggleSystemStatusDetails with this:
     private fun toggleSystemStatusDetails() {
         isSystemStatusExpanded = !isSystemStatusExpanded
-        binding.systemStatusDetails.visibility = if (isSystemStatusExpanded) View.VISIBLE else View.GONE
-        val rotation = if (isSystemStatusExpanded) 180f else 0f
-        binding.systemStatusArrow.animate().rotation(rotation).setDuration(300).start()
+
+        if (isSystemStatusExpanded) {
+            // 1. Show the details
+            binding.systemStatusDetails.visibility = View.VISIBLE
+
+            // 2. Rotate arrow (Animation)
+            binding.systemStatusArrow.animate().rotation(180f).setDuration(300).start()
+
+            // 3. FETCH REAL DATA from ViewModel
+            // (Ensure you added getNetworkStatus() to FSViewModel as discussed earlier!)
+            val status = viewModel.getNetworkStatus()
+
+            // 4. Update the UI with real values
+            binding.tvSysIp.text = status["IP Address"]
+            binding.tvSysGateway.text = status["Gateway"]
+            binding.tvSysBand.text = status["Band"]
+            binding.tvSysSpeed.text = status["Speed"]
+
+        } else {
+            // Collapse the card
+            binding.systemStatusDetails.visibility = View.GONE
+            binding.systemStatusArrow.animate().rotation(0f).setDuration(300).start()
+        }
     }
 
     private fun setupRecentActivity() {
