@@ -36,7 +36,7 @@ class WifiNetworkAdapter(
             macAddress.text = network.macAddress
             encryption.text = network.encryption
             frequencyText.text = network.frequency
-            signalStrengthText.text = "${network.signalStrength}%"
+            signalStrengthText.text = "${network.signalStrength}dBm"
 
             connectedBadge.visibility = if (network.isConnected) View.VISIBLE else View.GONE
 
