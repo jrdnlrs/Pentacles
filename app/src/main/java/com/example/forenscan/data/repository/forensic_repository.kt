@@ -30,7 +30,8 @@ class ForensicRepository(context: Context) {
     // =================================================================
 
     fun getAllNetworks(): Flow<List<WifiNetwork>> {
-        return networkDataDao.getAllNetworks().map { entities ->
+        // CHANGED: call getUniqueNetworks() instead of getAllNetworks()
+        return networkDataDao.getUniqueNetworks().map { entities ->
             entities.map { it.toDomain() }
         }
     }
