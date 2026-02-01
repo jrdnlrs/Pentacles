@@ -1,9 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#F8F9FE">
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -16,38 +18,36 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Header -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/threat_alerts"
-                android:textSize="28sp"
+                android:textSize="24sp"
                 android:textStyle="bold"
-                android:textColor="@android:color/white"
-                android:layout_marginBottom="16dp" />
+                android:textColor="#1A1C1E"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="20dp" />
 
-            <!-- Alert Summary Card -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="4dp"
-                android:background="@drawable/glass_card_background">
+                android:layout_marginBottom="24dp"
+                app:cardCornerRadius="28dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="@android:color/white">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp"
-                    android:background="@drawable/gradient_card_dark">
+                    android:padding="24dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:layout_marginBottom="12dp">
+                        android:layout_marginBottom="20dp">
 
                         <TextView
                             android:layout_width="0dp"
@@ -56,7 +56,7 @@
                             android:text="@string/threat_detection_center"
                             android:textSize="16sp"
                             android:textStyle="bold"
-                            android:textColor="#E2E8F0" />
+                            android:textColor="#1A1C1E" />
 
                         <TextView
                             android:id="@+id/active_alerts_badge"
@@ -65,14 +65,12 @@
                             android:background="@drawable/badge_danger"
                             android:paddingHorizontal="12dp"
                             android:paddingVertical="4dp"
-                            android:text="0 Active"
+                            android:text="3 Active"
                             android:textSize="12sp"
                             android:textStyle="bold"
                             android:textColor="@android:color/white" />
-
                     </LinearLayout>
 
-                    <!-- Stats Grid -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -85,23 +83,20 @@
                             android:layout_weight="1"
                             android:orientation="vertical"
                             android:gravity="center">
-
                             <TextView
                                 android:id="@+id/critical_count"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="0"
-                                android:textSize="20sp"
+                                android:text="1"
+                                android:textSize="22sp"
                                 android:textStyle="bold"
                                 android:textColor="#EF4444" />
-
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/critical"
                                 android:textSize="12sp"
-                                android:textColor="#9CA3AF" />
-
+                                android:textColor="#5E6268" />
                         </LinearLayout>
 
                         <LinearLayout
@@ -110,23 +105,20 @@
                             android:layout_weight="1"
                             android:orientation="vertical"
                             android:gravity="center">
-
                             <TextView
                                 android:id="@+id/high_count"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="0"
-                                android:textSize="20sp"
+                                android:text="2"
+                                android:textSize="22sp"
                                 android:textStyle="bold"
-                                android:textColor="#F59E0B" />
-
+                                android:textColor="#F97316" />
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/high"
                                 android:textSize="12sp"
-                                android:textColor="#9CA3AF" />
-
+                                android:textColor="#5E6268" />
                         </LinearLayout>
 
                         <LinearLayout
@@ -135,32 +127,25 @@
                             android:layout_weight="1"
                             android:orientation="vertical"
                             android:gravity="center">
-
                             <TextView
                                 android:id="@+id/medium_count"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="0"
-                                android:textSize="20sp"
+                                android:textSize="22sp"
                                 android:textStyle="bold"
-                                android:textColor="#FBBF24" />
-
+                                android:textColor="#EAB308" />
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/medium"
                                 android:textSize="12sp"
-                                android:textColor="#9CA3AF" />
-
+                                android:textColor="#5E6268" />
                         </LinearLayout>
-
                     </LinearLayout>
-
                 </LinearLayout>
-
             </androidx.cardview.widget.CardView>
 
-            <!-- Filter Chips -->
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/filter_chip_group"
                 android:layout_width="match_parent"
@@ -175,9 +160,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/all"
-                    android:checked="false"
-                    android:textColor="@color/chip_text_color"
-                    app:chipBackgroundColor="@color/chip_background_color" />
+                    android:textColor="#666666" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chip_active"
@@ -186,8 +169,8 @@
                     android:layout_height="wrap_content"
                     android:text="@string/active"
                     android:checked="true"
-                    android:textColor="@color/chip_text_color"
-                    app:chipBackgroundColor="@color/chip_background_color" />
+                    app:chipBackgroundColor="@color/connections_accent"
+                    android:textColor="@android:color/white" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chip_resolved"
@@ -195,69 +178,49 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/resolved"
-                    android:checked="false"
-                    android:textColor="@color/chip_text_color"
-                    app:chipBackgroundColor="@color/chip_background_color" />
-
+                    android:textColor="#666666" />
             </com.google.android.material.chip.ChipGroup>
 
-            <!-- Alerts List -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/alerts_recycler_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:nestedScrollingEnabled="false"
-                tools:listitem="@layout/item_threat_alert"
-                tools:itemCount="3" />
+                tools:listitem="@layout/item_threat_alert" />
 
-            <!-- Empty State -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/empty_state_card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="4dp"
-                android:background="@drawable/glass_card_background">
+                app:cardCornerRadius="28dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="@android:color/white">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:padding="32dp"
-                    android:gravity="center"
-                    android:background="@drawable/gradient_card_success">
+                    android:gravity="center">
 
                     <ImageView
                         android:layout_width="64dp"
                         android:layout_height="64dp"
-                        android:src="@drawable/ic_check_circle"
+                        android:src="@drawable/ic_shield_check"
                         android:layout_marginBottom="16dp"
                         app:tint="#10B981" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/no_active_threats"
+                        android:text="No active threats found"
                         android:textSize="18sp"
                         android:textStyle="bold"
-                        android:textColor="#10B981"
-                        android:layout_marginBottom="8dp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/connections_secure_message"
-                        android:textSize="14sp"
-                        android:textColor="#CBD5E1"
-                        android:gravity="center" />
-
+                        android:textColor="#10B981" />
                 </LinearLayout>
-
             </androidx.cardview.widget.CardView>
 
         </LinearLayout>
-
     </androidx.core.widget.NestedScrollView>
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -45,8 +45,9 @@
 
                 <TextView
                     android:id="@+id/networkName"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:ellipsize="end"
                     android:maxLines="1"
                     android:textColor="#1A1C1E"
@@ -132,7 +133,7 @@
                     android:layout_marginStart="4dp"
                     android:textColor="#666666"
                     android:textSize="12sp"
-                    tools:text="85%" />
+                    tools:text="85dbm" />
             </LinearLayout>
             <ImageView
                 android:id="@+id/statusIconSmall"
