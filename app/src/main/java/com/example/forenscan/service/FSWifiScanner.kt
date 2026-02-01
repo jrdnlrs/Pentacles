@@ -41,7 +41,6 @@ class FSWifiScanner : Service() {
     private var isScanning = false
 
     // Add model as a property
-
     private var mlModel: MLModelHelper? = null
 
     // Signal History for Anomaly Detection
@@ -250,6 +249,44 @@ class FSWifiScanner : Service() {
         val dataRate = if (scanResult.frequency >= 5000) 0.8f else 0.5f
 
         return floatArrayOf(protection, signal, dataRate)
+    }
+
+    /**
+     * DETECT ANOMALY:
+     * Checks if the signal strength (dBm) suddenly spikes, which often indicates
+     * an attacker (Evil Twin) has just activated a stronger transmitter nearby.
+     */
+    private fun checkSignalAnomaly(bssid: String, currentLevel: Int): Boolean {
+        // 1. Get or create the history list for this specific BSSID
+        val history = signalHistory.getOrPut(bssid) { mutableListOf() }
+
+        // 2. Add the new reading
+        history.add(currentLevel)
+
+        // 3. Maintain a small window (e.g., last 5 scans) to save memory
+        if (history.size > 5) {
+            history.removeAt(0)
+        }
+
+        // 4. We need at least 3 data points to establish a "baseline" average
+        if (history.size < 3) return false
+
+        // 5. Calculate Average of previous readings (excluding the current one)
+        val previousReadings = history.take(history.size - 1)
+        val averageSignal = previousReadings.average()
+
+        // 6. DETECT SPIKE:
+        // If current signal is significantly stronger (> 10-15 dBm difference) than the average,
+        // it is suspicious. (Note: dBm is negative, so closer to 0 is stronger)
+        // Example: Average was -80, Current is -50. Diff is 30.
+        val spikeThreshold = 15 // dBm
+        val isSpike = (currentLevel - averageSignal) > spikeThreshold
+
+        if (isSpike) {
+            Log.w("FSWifiScanner", "ANOMALY: Signal spike detected for $bssid. Avg: $averageSignal, Current: $currentLevel")
+        }
+
+        return isSpike
     }
 
 }

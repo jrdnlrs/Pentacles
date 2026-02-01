@@ -37,7 +37,8 @@ class ForensicRepository(context: Context) {
      * Returns a live stream of all scanned networks.
      */
     fun getAllNetworks(): Flow<List<WifiNetwork>> {
-        return networkDataDao.getAllNetworks().map { entities ->
+        // CHANGED: call getUniqueNetworks() instead of getAllNetworks()
+        return networkDataDao.getUniqueNetworks().map { entities ->
             entities.map { it.toDomain() }
         }
     }
